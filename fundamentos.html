@@ -269,4 +269,45 @@
         <h3>Formas base (em C)</h3>
         <label class="check"><input type="checkbox" data-k="f-maj"><span>Arpejo maior</span></label>
         <label class="check"><input type="checkbox" data-k="f-min"><span>Arpejo menor</span></label>
-        <label class="check"><input type="checkbox" data-k="f-penta"><span>P
+        <label class="check"><input type="checkbox" data-k="f-penta"><span>Pentatônica maior</span></label>
+        <label class="check"><input type="checkbox" data-k="f-7m"><span>Tétrade 7M</span></label>
+        <label class="check"><input type="checkbox" data-k="f-7"><span>Tétrade 7</span></label>
+        <label class="check"><input type="checkbox" data-k="f-m7"><span>Tétrade m7</span></label>
+        <label class="check"><input type="checkbox" data-k="f-m7b5"><span>Tétrade m7(b5)</span></label>
+      </div>
+      <div class="track-card">
+        <h3>Camadas</h3>
+        <label class="check"><input type="checkbox" data-k="lay-pos"><span>5 posições (CAGED)</span></label>
+        <label class="check"><input type="checkbox" data-k="lay-trans"><span>Transposto em 3 tons</span></label>
+        <label class="check"><input type="checkbox" data-k="lay-auto"><span>Automático (sem pensar)</span></label>
+      </div>
+    </div>
+  </section>
+
+  <footer>npmltech.github.io/guitar · fundamentos em Dó</footer>
+</div>
+
+<script>
+// logout
+document.getElementById("logout")?.addEventListener("click", function(e){
+  e.preventDefault();
+  localStorage.removeItem("npml-guitar-auth");
+  location.reload();
+});
+
+// track checkboxes
+try {
+  const TRACK_KEY = "npml-guitar-track-v1";
+  var saved = JSON.parse(localStorage.getItem(TRACK_KEY) || "{}");
+  document.querySelectorAll('.check input[type="checkbox"]').forEach(function(cb){
+    var key = cb.getAttribute("data-k");
+    if (key && saved[key] === true) cb.checked = true;
+    cb.addEventListener("change", function(){
+      saved[key] = cb.checked;
+      localStorage.setItem(TRACK_KEY, JSON.stringify(saved));
+    });
+  });
+} catch(e) { /* fail silently */ }
+</script>
+</body>
+</html>
