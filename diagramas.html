@@ -134,9 +134,16 @@
     <p>Ache uma <b>T</b> na 6ª ou na 5ª corda e toque só as notas ao redor dela — é uma posição. Suba para a próxima T: mesma forma, nova região do braço. Percorrer todas as Ts do diagrama é cobrir o braço inteiro. Troque a tônica para transpor pelo ciclo de quartas (C → F → B♭ …).</p>
   </div>
 
-  <footer>Braço horizontal · mostra somente as notas da seleção ativa · parte do kit de estudo em Dó.</footer>
+  <footer>Braço horizontal · mostra somente as notas da seleção ativa · parte do kit de estudo em Dó. · <a href="#" id="logout" style="color:inherit">encerrar sessão</a></footer>
 </div>
 
+<script>
+  document.getElementById("logout").addEventListener("click", function(ev){
+    ev.preventDefault();
+    localStorage.removeItem("npml-guitar-auth");
+    location.href = "login.html";
+  });
+</script>
 <script>
   var STRINGS = [
     {n:'E', open:4}, {n:'A', open:9}, {n:'D', open:2},

@@ -430,9 +430,16 @@
     </div>
   </section>
 
-  <footer>Feito para acompanhar as aulas semanais · atualize a rotação conforme o professor avança.</footer>
+  <footer>Feito para acompanhar as aulas semanais · atualize a rotação conforme o professor avança. · <a href="#" id="logout" style="color:inherit">encerrar sessão</a></footer>
 </div>
 
+<script>
+  document.getElementById("logout").addEventListener("click", function(ev){
+    ev.preventDefault();
+    localStorage.removeItem("npml-guitar-auth");
+    location.href = "login.html";
+  });
+</script>
 <script>
   (function(){
     var KEY = "cronograma-guitarra-v1";
