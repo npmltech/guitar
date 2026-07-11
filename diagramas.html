@@ -25,16 +25,17 @@
     --line: #E0DDD6; --line-strong: #CFCBC2; --grid: #33373F;
     --brass: #B07A15; --brass-deep: #8A5E0C; --brass-wash: #F3E9D4;
     --focus: #2C6E63;
+    --zone-g: #B5502E; --zone-e: #6B4E9E; --zone-d: #4C7A3A;
     --shadow: 0 1px 2px rgba(28,30,36,.05), 0 6px 20px rgba(28,30,36,.06);
     --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
     --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --paper:#14161B; --paper-2:#181A20; --card:#20232B; --ink:#E9E7E1; --ink-soft:#B4B2AC; --ink-faint:#7E8089; --line:#2B2E37; --line-strong:#3A3F4A; --grid:#5B6270; --brass:#D5A23F; --brass-deep:#E7BB63; --brass-wash:#2A2418; --focus:#55A99B; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); }
+    :root{ --paper:#14161B; --paper-2:#181A20; --card:#20232B; --ink:#E9E7E1; --ink-soft:#B4B2AC; --ink-faint:#7E8089; --line:#2B2E37; --line-strong:#3A3F4A; --grid:#5B6270; --brass:#D5A23F; --brass-deep:#E7BB63; --brass-wash:#2A2418; --focus:#55A99B; --zone-g:#E08B5F; --zone-e:#A98FE0; --zone-d:#8FC96C; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); }
   }
-  :root[data-theme="light"]{ --paper:#F4F3F0; --paper-2:#FBFAF8; --card:#FFFFFF; --ink:#1C1E24; --ink-soft:#4A4D56; --ink-faint:#83868F; --line:#E0DDD6; --line-strong:#CFCBC2; --grid:#33373F; --brass:#B07A15; --brass-deep:#8A5E0C; --brass-wash:#F3E9D4; --focus:#2C6E63; --shadow:0 1px 2px rgba(28,30,36,.05),0 6px 20px rgba(28,30,36,.06); }
-  :root[data-theme="dark"]{ --paper:#14161B; --paper-2:#181A20; --card:#20232B; --ink:#E9E7E1; --ink-soft:#B4B2AC; --ink-faint:#7E8089; --line:#2B2E37; --line-strong:#3A3F4A; --grid:#5B6270; --brass:#D5A23F; --brass-deep:#E7BB63; --brass-wash:#2A2418; --focus:#55A99B; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); }
+  :root[data-theme="light"]{ --paper:#F4F3F0; --paper-2:#FBFAF8; --card:#FFFFFF; --ink:#1C1E24; --ink-soft:#4A4D56; --ink-faint:#83868F; --line:#E0DDD6; --line-strong:#CFCBC2; --grid:#33373F; --brass:#B07A15; --brass-deep:#8A5E0C; --brass-wash:#F3E9D4; --focus:#2C6E63; --zone-g:#B5502E; --zone-e:#6B4E9E; --zone-d:#4C7A3A; --shadow:0 1px 2px rgba(28,30,36,.05),0 6px 20px rgba(28,30,36,.06); }
+  :root[data-theme="dark"]{ --paper:#14161B; --paper-2:#181A20; --card:#20232B; --ink:#E9E7E1; --ink-soft:#B4B2AC; --ink-faint:#7E8089; --line:#2B2E37; --line-strong:#3A3F4A; --grid:#5B6270; --brass:#D5A23F; --brass-deep:#E7BB63; --brass-wash:#2A2418; --focus:#55A99B; --zone-g:#E08B5F; --zone-e:#A98FE0; --zone-d:#8FC96C; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); }
 
   * { box-sizing: border-box; }
   body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased; }
@@ -77,13 +78,25 @@
   .n-sev  circle { fill:var(--card); stroke:var(--ink-soft); stroke-width:1.8; } .n-sev text { fill:var(--ink); }
   .n-ext  circle { fill:var(--focus); } .n-ext text { fill:#fff; }
 
+  .zone-C circle { fill:var(--brass); } .zone-C text { fill:#fff; }
+  .zone-A circle { fill:var(--focus); } .zone-A text { fill:#fff; }
+  .zone-G circle { fill:var(--zone-g); } .zone-G text { fill:#fff; }
+  .zone-E circle { fill:var(--zone-e); } .zone-E text { fill:#fff; }
+  .zone-D circle { fill:var(--zone-d); } .zone-D text { fill:#fff; }
+  .note.is-root circle { stroke:var(--ink); stroke-width:2.5; }
+
   .legend { display:flex; flex-wrap:wrap; gap:1rem 1.3rem; margin-top:1.2rem; font-size:.85rem; color:var(--ink-soft); }
   .legend .li { display:flex; align-items:center; gap:.45rem; }
   .dot { width:1.05rem; height:1.05rem; border-radius:50%; display:inline-block; flex:none; }
-  .dot.root { background:var(--brass); }
-  .dot.core { background:var(--ink); }
-  .dot.sev { background:var(--card); border:1.8px solid var(--ink-soft); }
-  .dot.ext { background:var(--focus); }
+  .dot.zc { background:var(--brass); }
+  .dot.za { background:var(--focus); }
+  .dot.zg { background:var(--zone-g); }
+  .dot.ze { background:var(--zone-e); }
+  .dot.zd { background:var(--zone-d); }
+  .dot.zroot { background:var(--ink-soft); border:2.5px solid var(--ink); }
+
+  .fb-chain { fill:none; stroke:var(--brass-deep); stroke-width:2.25; stroke-linejoin:round; stroke-linecap:round; opacity:.8; }
+  .note.dim circle { opacity:.16; } .note.dim text { opacity:.28; }
 
   .tip { margin-top:1.7rem; background:linear-gradient(180deg,var(--brass-wash),var(--card)); border:1px solid var(--brass); border-radius:12px; padding:1rem 1.2rem; font-size:.92rem; }
   .tip b { color:var(--brass-deep); }
@@ -105,7 +118,7 @@
   <header>
     <p class="eyebrow">Kit de estudo · diagramas de braço (horizontal)</p>
     <h1>Arpejos no braço — <em>só as notas que você toca</em></h1>
-    <p class="lead">Escolha o tipo de estudo e a tônica: o braço mostra <strong>apenas as notas daquela seleção</strong> — no arpejo maior só T·3·5, na pentatônica só as 5 notas dela, e assim por diante. Nada de excesso de informação no braço.</p>
+    <p class="lead">Escolha o tipo de estudo e a tônica: o braço mostra <strong>apenas as notas daquela seleção</strong> — no arpejo maior só T·3·5, na pentatônica só as 5 notas dela, e assim por diante. Cada nota já vem colorida pela sua <strong>posição CAGED</strong> (C·A·G·E·D); use o seletor "Posição" pra isolar o grip real de uma forma.</p>
   </header>
 
   <div class="panel">
@@ -117,6 +130,14 @@
       <div class="ctrl-group">
         <div class="lbl">Tônica</div>
         <div class="btns" id="rootBtns"></div>
+      </div>
+      <div class="ctrl-group">
+        <div class="lbl">Exibição</div>
+        <div class="btns" id="modeBtns"></div>
+      </div>
+      <div class="ctrl-group">
+        <div class="lbl">Posição (CAGED)</div>
+        <div class="btns" id="posBtns"></div>
       </div>
     </div>
   </div>
@@ -131,15 +152,18 @@
   </div>
 
   <div class="legend">
-    <span class="li"><span class="dot root"></span> T — tônica</span>
-    <span class="li"><span class="dot core"></span> núcleo (3ª, 5ª)</span>
-    <span class="li"><span class="dot sev"></span> 7ª (7 / 7M)</span>
-    <span class="li"><span class="dot ext"></span> extensão (2ª, 6ª)</span>
+    <span class="li"><span class="dot zc"></span> posição C</span>
+    <span class="li"><span class="dot za"></span> posição A</span>
+    <span class="li"><span class="dot zg"></span> posição G</span>
+    <span class="li"><span class="dot ze"></span> posição E</span>
+    <span class="li"><span class="dot zd"></span> posição D</span>
+    <span class="li"><span class="dot zroot"></span> tônica (borda grossa)</span>
+    <span class="li"><span style="width:1.05rem;height:2px;background:var(--brass-deep);display:inline-block;"></span> linha de posição — conecta as notas, corda a corda</span>
   </div>
 
   <div class="tip">
-    <b>Como praticar (cobrir as 5 posições):</b>
-    <p>Ache uma <b>T</b> na 6ª ou na 5ª corda e toque só as notas ao redor dela — é uma posição. Suba para a próxima T: mesma forma, nova região do braço. Percorrer todas as Ts do diagrama é cobrir o braço inteiro. Troque a tônica para transpor pelo ciclo de quartas (C → F → B♭ …).</p>
+    <b>Como praticar as 5 posições:</b>
+    <p><b>Arpejos e tétrades</b>: escolha uma forma — C, A, G, E ou D — no seletor "Posição (CAGED)". Cada uma mostra só o grip real daquele acorde (uma nota por corda), pronto pra tocar com a mão. São as 5 formas clássicas do sistema CAGED, deslizadas até a tônica escolhida. <b>Pentatônica</b>: as posições 1-5 mostram a caixa de escala ao redor de cada tônica no braço (várias notas por corda, como de costume). Troque a tônica para transpor pelo ciclo de quartas (C → F → B♭ …).</p>
   </div>
 
   <footer>Braço horizontal · mostra somente as notas da seleção ativa · parte do kit de estudo em Dó.</footer>
@@ -159,18 +183,81 @@
   ]; // topo = 6ª corda (mi grave), base = 1ª corda (mi agudo)
 
   var ARPS = {
-    maior: { name:'Arpejo maior',      formula:'1 · 3 · 5',         map:{0:'T',4:'3',7:'5'} },
-    menor: { name:'Arpejo menor',      formula:'1 · ♭3 · 5',        map:{0:'T',3:'♭3',7:'5'} },
-    penta: { name:'Pentatônica maior', formula:'1 · 2 · 3 · 5 · 6', map:{0:'T',2:'2',4:'3',7:'5',9:'6'} },
-    t7M:   { name:'Tétrade 7M',        formula:'1 · 3 · 5 · 7',     map:{0:'T',4:'3',7:'5',11:'7M'} },
-    t7:    { name:'Tétrade 7',         formula:'1 · 3 · 5 · ♭7',    map:{0:'T',4:'3',7:'5',10:'7'} },
-    tm7:   { name:'Tétrade m7',        formula:'1 · ♭3 · 5 · ♭7',   map:{0:'T',3:'♭3',7:'5',10:'7'} },
-    tm7b5: { name:'Tétrade m7(♭5)',    formula:'1 · ♭3 · ♭5 · ♭7',  map:{0:'T',3:'♭3',6:'♭5',10:'7'} }
+    maior: { name:'Arpejo maior',      formula:'1 · 3 · 5',         map:{0:'T',4:'3',7:'5'},               kind:'chord' },
+    menor: { name:'Arpejo menor',      formula:'1 · ♭3 · 5',        map:{0:'T',3:'♭3',7:'5'},              kind:'chord' },
+    penta: { name:'Pentatônica maior', formula:'1 · 2 · 3 · 5 · 6', map:{0:'T',2:'2',4:'3',7:'5',9:'6'},   kind:'scale' },
+    t7M:   { name:'Tétrade 7M',        formula:'1 · 3 · 5 · 7',     map:{0:'T',4:'3',7:'5',11:'7M'},       kind:'chord' },
+    t7:    { name:'Tétrade 7',         formula:'1 · 3 · 5 · ♭7',    map:{0:'T',4:'3',7:'5',10:'7'},        kind:'chord' },
+    tm7:   { name:'Tétrade m7',        formula:'1 · ♭3 · 5 · ♭7',   map:{0:'T',3:'♭3',7:'5',10:'7'},       kind:'chord' },
+    tm7b5: { name:'Tétrade m7(♭5)',    formula:'1 · ♭3 · ♭5 · ♭7',  map:{0:'T',3:'♭3',6:'♭5',10:'7'},      kind:'chord' }
   };
   var ORDER = ['maior','menor','penta','t7M','t7','tm7','tm7b5'];
   var LABELS = { maior:'Maior', menor:'Menor', penta:'Penta maior', t7M:'7M', t7:'7', tm7:'m7', tm7b5:'m7(♭5)' };
   var ROOTS = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-  var state = { arp:'maior', root:0 };
+  var MODES = ['deg','note'];
+  var MODE_LABELS = { deg:'Graus', note:'Notas' };
+  var state = { arp:'maior', root:0, mode:'deg', position:'all' };
+
+  // As 5 formas CAGED — grip fixo (uma nota por corda) derivado dos acordes abertos reais
+  // (C=x32010, A=x02220, G=320003, E=022100, D=xx0232), na ordem em que aparecem no braço.
+  var SHAPE_ORDER = ['C','A','G','E','D'];
+  var ROOT_STRING_BY_SHAPE = { E:0, A:1, C:1, G:0, D:2 };
+  var CHORD_SHAPES = {
+    maior: {
+      E: [[0,0],[1,2],[2,2],[3,1],[4,0],[5,0]],
+      A: [[1,0],[2,2],[3,2],[4,2],[5,0]],
+      C: [[1,0],[2,-1],[3,-3],[4,-2],[5,-3]],
+      G: [[0,0],[1,-1],[2,-3],[3,-3],[4,-3],[5,0]],
+      D: [[2,0],[3,2],[4,3],[5,2]]
+    },
+    menor: {
+      E: [[0,0],[1,2],[2,2],[3,0],[4,0],[5,0]],
+      A: [[1,0],[2,2],[3,2],[4,1],[5,0]],
+      C: [[1,0],[2,-2],[3,-3],[4,-2],[5,-4]],
+      G: [[0,0],[1,-2],[2,-3],[3,-3],[4,-4],[5,0]],
+      D: [[2,0],[3,2],[4,3],[5,1]]
+    },
+    t7M: {
+      E: [[0,0],[1,2],[2,1],[3,1],[4,0],[5,0]],
+      A: [[1,0],[2,2],[3,1],[4,2],[5,0]],
+      C: [[1,0],[2,-1],[3,-3],[4,-3],[5,-3]],
+      G: [[0,0],[1,-1],[2,-3],[3,-3],[4,-3],[5,-1]],
+      D: [[2,0],[3,2],[4,2],[5,2]]
+    },
+    t7: {
+      E: [[0,0],[1,2],[2,0],[3,1],[4,0],[5,0]],
+      A: [[1,0],[2,2],[3,0],[4,2],[5,0]],
+      C: [[1,0],[2,-1],[3,0],[4,-2],[5,-3]],
+      G: [[0,0],[1,-1],[2,-3],[3,-3],[4,-3],[5,-2]],
+      D: [[2,0],[3,2],[4,1],[5,2]]
+    },
+    tm7: {
+      E: [[0,0],[1,2],[2,0],[3,0],[4,0],[5,0]],
+      A: [[1,0],[2,2],[3,0],[4,1],[5,0]],
+      C: [[1,0],[2,-2],[3,-3],[4,-4],[5,-4]],
+      G: [[0,0],[1,-2],[2,-3],[3,-3],[4,-4],[5,-2]],
+      D: [[2,0],[3,2],[4,1],[5,1]]
+    },
+    tm7b5: {
+      E: [[0,0],[1,1],[2,0],[3,0]],
+      A: [[1,0],[2,1],[3,0],[4,1]],
+      C: [[1,0],[2,-2],[3,-4],[4,-4]],
+      G: [[0,0],[1,-2],[2,-4],[3,-5]],
+      D: [[2,0],[3,1],[4,1],[5,1]]
+    }
+  };
+
+  // Posiciona a forma no braço: acha a casa mais próxima do zero para a corda-tônica
+  // da forma e empurra uma oitava acima se alguma nota do grip cairia em casa negativa.
+  function computeChordShapeNotes(arpKey, shapeLetter, root){
+    var notes = CHORD_SHAPES[arpKey][shapeLetter];
+    var rootStrIdx = ROOT_STRING_BY_SHAPE[shapeLetter];
+    var raw = ((root - STRINGS[rootStrIdx].open) % 12 + 12) % 12;
+    var minOff = Math.min.apply(null, notes.map(function(n){ return n[1]; }));
+    var fret0 = raw;
+    if(fret0 + minOff < 0) fret0 += 12;
+    return notes.map(function(n){ return { str:n[0], fret: fret0 + n[1] }; });
+  }
 
   function role(iv){
     if(iv===0) return 'n-root';
@@ -179,11 +266,70 @@
     return 'n-core';
   }
 
+  // A distância (casas) de cada forma até a forma C é fixa e não depende da tônica —
+  // é só (corda-tônica de C) menos (corda-tônica da forma), pois cada corda soma sempre
+  // o mesmo intervalo. Isso dá as 5 posições que se repetem a cada 12 casas no braço inteiro.
+  var FIXED_OFFSET_FROM_C = { C:0, A:0, G:5, E:5, D:7 };
+  function computeCagedZoneMap(root, maxFret){
+    var anchorC = ((root - STRINGS[ROOT_STRING_BY_SHAPE.C].open) % 12 + 12) % 12;
+    var anchors = [];
+    for(var cyc=-1; cyc<=2; cyc++){
+      SHAPE_ORDER.forEach(function(L){
+        anchors.push({ letter:L, fret: anchorC + FIXED_OFFSET_FROM_C[L] + 12*cyc });
+      });
+    }
+    anchors.sort(function(a,b){ return a.fret - b.fret; });
+    var zones = [];
+    for(var i=0; i<anchors.length; i++){
+      var start = (i===0) ? -999 : zones[i-1].end + 1;
+      var end = (i===anchors.length-1) ? 999 : Math.floor((anchors[i].fret + anchors[i+1].fret)/2);
+      zones.push({ letter: anchors[i].letter, start:start, end:end });
+    }
+    var byFret = [];
+    for(var f=0; f<=maxFret; f++){
+      for(var z=0; z<zones.length; z++){
+        if(f >= zones[z].start && f <= zones[z].end){ byFret.push(zones[z].letter); break; }
+      }
+    }
+    return byFret;
+  }
+
+  // As 5 posições CAGED: a tônica cai em exatamente 5 casas distintas (0-11) ao longo
+  // das 6 cordas (a 1ª e a 6ª corda coincidem, por terem a mesma nota aberta "E").
+  // Cada posição é a faixa de casas entre o ponto médio para a tônica anterior e a seguinte.
+  function computeCagedPositions(root, maxFret){
+    var anchors = [];
+    STRINGS.forEach(function(str){
+      var fr = ((root - str.open) % 12 + 12) % 12;
+      if(anchors.indexOf(fr) === -1) anchors.push(fr);
+    });
+    anchors.sort(function(a,b){ return a-b; });
+    var bounds = [];
+    for(var i=0; i<anchors.length-1; i++) bounds.push(Math.floor((anchors[i]+anchors[i+1])/2));
+    var positions = [];
+    var prevEnd = 0;
+    for(var p=0; p<anchors.length; p++){
+      var end = (p < bounds.length) ? bounds[p] : maxFret;
+      positions.push({ start: prevEnd, end: Math.min(end, maxFret) });
+      prevEnd = end + 1;
+    }
+    return positions;
+  }
+
   function renderBoard(){
     var arp = ARPS[state.arp], map = arp.map, root = state.root;
-    var maxFret = 15, sg = 32, top = 22, nutX = 56, fw = 46, R = 11;
+    var maxFret = 17, sg = 32, top = 22, nutX = 56, fw = 46, R = 11;
     var openX = nutX - 26;
     var W = nutX + maxFret*fw + 16, H = top + 5*sg + 30;
+
+    // "pos": para arpejos/tétrades (kind=chord) é a forma CAGED fixa selecionada (grip de mão real);
+    // para a pentatônica (kind=scale) é a janela de casas ao redor de uma das 5 tônicas do braço.
+    var chordNotes = null, scalePos = null;
+    if(arp.kind === 'chord' && state.position !== 'all'){
+      chordNotes = computeChordShapeNotes(state.arp, state.position, root);
+    } else if(arp.kind === 'scale' && state.position !== 'all'){
+      scalePos = computeCagedPositions(root, maxFret)[state.position];
+    }
     var s = '<svg class="board" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama horizontal de '+arp.name+' em '+ROOTS[root]+'">';
 
     // strings (horizontal) + labels
@@ -206,20 +352,70 @@
     // fret numbers (below)
     [3,5,7,9,12,15].forEach(function(f){ var x=nutX+(f-0.5)*fw; s+='<text class="fb-fnum" x="'+x+'" y="'+(top+5*sg+22)+'">'+f+'</text>'; });
 
+    function fretX(fr){ return fr===0 ? openX : (nutX + (fr-0.5)*fw); }
+
+    // cadeia de posição — conecta, corda a corda, as notas da forma/posição selecionada
+    if(chordNotes){
+      var chainPts = chordNotes.slice().sort(function(a,b){ return a.str-b.str; })
+        .map(function(n){ return fretX(n.fret)+','+(top+n.str*sg); });
+      if(chainPts.length > 1) s += '<polyline class="fb-chain" points="'+chainPts.join(' ')+'"/>';
+    } else if(scalePos){
+      var chainPts2 = [];
+      for(var cst=0; cst<6; cst++){
+        for(var cfr=scalePos.start; cfr<=scalePos.end; cfr++){
+          var csemi = (STRINGS[cst].open + cfr) % 12;
+          var civ = ((csemi - root) % 12 + 12) % 12;
+          if(map[civ] === undefined) continue;
+          chainPts2.push(fretX(cfr)+','+(top+cst*sg));
+        }
+      }
+      if(chainPts2.length > 1) s += '<polyline class="fb-chain" points="'+chainPts2.join(' ')+'"/>';
+    }
+
     // notes
-    for(var st=0; st<6; st++){
-      for(var fr=0; fr<=maxFret; fr++){
-        var semi = (STRINGS[st].open + fr) % 12;
+    if(chordNotes){
+      // forma CAGED fixa: mostra só o grip (uma nota por corda) da forma escolhida, sem o resto do braço
+      chordNotes.forEach(function(n){
+        var semi = (STRINGS[n.str].open + n.fret) % 12;
         var iv = ((semi - root) % 12 + 12) % 12;
-        if(map[iv] === undefined) continue;
-        var y2 = top + st*sg;
-        var x = (fr===0) ? openX : (nutX + (fr-0.5)*fw);
-        s += '<g class="note '+role(iv)+'"><circle cx="'+x+'" cy="'+y2+'" r="'+R+'"/><text x="'+x+'" y="'+y2+'">'+map[iv]+'</text></g>';
+        var y2 = top + n.str*sg, x = fretX(n.fret);
+        var label = state.mode === 'note' ? ROOTS[semi] : map[iv];
+        s += '<g class="note '+role(iv)+'"><circle cx="'+x+'" cy="'+y2+'" r="'+R+'"/><text x="'+x+'" y="'+y2+'">'+label+'</text></g>';
+      });
+    } else if(scalePos){
+      for(var st=0; st<6; st++){
+        for(var fr=0; fr<=maxFret; fr++){
+          var semi = (STRINGS[st].open + fr) % 12;
+          var iv = ((semi - root) % 12 + 12) % 12;
+          if(map[iv] === undefined) continue;
+          var y2 = top + st*sg;
+          var x = fretX(fr);
+          var label = state.mode === 'note' ? ROOTS[semi] : map[iv];
+          var inPos = (fr >= scalePos.start && fr <= scalePos.end);
+          s += '<g class="note '+role(iv)+(inPos?'':' dim')+'"><circle cx="'+x+'" cy="'+y2+'" r="'+R+'"/><text x="'+x+'" y="'+y2+'">'+label+'</text></g>';
+        }
+      }
+    } else {
+      // Todas: cada nota do braço inteiro colorida pela sua posição CAGED (C/A/G/E/D)
+      var zoneMap = computeCagedZoneMap(root, maxFret);
+      for(var st2=0; st2<6; st2++){
+        for(var fr2=0; fr2<=maxFret; fr2++){
+          var semi2 = (STRINGS[st2].open + fr2) % 12;
+          var iv2 = ((semi2 - root) % 12 + 12) % 12;
+          if(map[iv2] === undefined) continue;
+          var y3 = top + st2*sg;
+          var x3 = fretX(fr2);
+          var label2 = state.mode === 'note' ? ROOTS[semi2] : map[iv2];
+          var zc = 'zone-' + zoneMap[fr2];
+          var rootCls = iv2===0 ? ' is-root' : '';
+          s += '<g class="note '+zc+rootCls+'"><circle cx="'+x3+'" cy="'+y3+'" r="'+R+'"/><text x="'+x3+'" y="'+y3+'">'+label2+'</text></g>';
+        }
       }
     }
     s += '</svg>';
     document.getElementById('board').innerHTML = s;
-    document.getElementById('nowName').textContent = arp.name + ' · em ' + ROOTS[root];
+    var posLabel = chordNotes ? (' · forma '+state.position) : (scalePos ? (' · posição '+(state.position+1)) : '');
+    document.getElementById('nowName').textContent = arp.name + ' · em ' + ROOTS[root] + posLabel;
     document.getElementById('nowFormula').textContent = arp.formula;
   }
 
@@ -230,7 +426,7 @@
       b.className = 'pick' + (k===state.arp?' active':'');
       b.textContent = LABELS[k];
       b.setAttribute('aria-pressed', k===state.arp);
-      b.onclick = function(){ state.arp = k; syncActive(tb,b); renderBoard(); };
+      b.onclick = function(){ state.arp = k; state.position = 'all'; syncActive(tb,b); buildPosBtns(); renderBoard(); };
       tb.appendChild(b);
     });
     var rb = document.getElementById('rootBtns');
@@ -241,6 +437,33 @@
       b.setAttribute('aria-pressed', idx===state.root);
       b.onclick = function(){ state.root = idx; syncActive(rb,b); renderBoard(); };
       rb.appendChild(b);
+    });
+    var mb = document.getElementById('modeBtns');
+    MODES.forEach(function(k){
+      var b = document.createElement('button');
+      b.className = 'pick' + (k===state.mode?' active':'');
+      b.textContent = MODE_LABELS[k];
+      b.setAttribute('aria-pressed', k===state.mode);
+      b.onclick = function(){ state.mode = k; syncActive(mb,b); renderBoard(); };
+      mb.appendChild(b);
+    });
+    buildPosBtns();
+  }
+
+  // Reconstrói os botões de posição: letras C-A-G-E-D para acordes/tétrades (formas fixas),
+  // números 1-5 para a pentatônica (janelas de escala). Chamado de novo sempre que o tipo muda.
+  function buildPosBtns(){
+    var pb = document.getElementById('posBtns');
+    pb.innerHTML = '';
+    var isChord = ARPS[state.arp].kind === 'chord';
+    var keys = ['all'].concat(isChord ? SHAPE_ORDER : [0,1,2,3,4]);
+    keys.forEach(function(k){
+      var b = document.createElement('button');
+      b.className = 'pick' + (k===state.position?' active':'');
+      b.textContent = (k==='all') ? 'Todas' : (isChord ? k : (k+1));
+      b.setAttribute('aria-pressed', k===state.position);
+      b.onclick = function(){ state.position = k; syncActive(pb,b); renderBoard(); };
+      pb.appendChild(b);
     });
   }
   function syncActive(container, btn){
