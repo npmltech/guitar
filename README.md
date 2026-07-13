@@ -17,6 +17,10 @@ Kit de estudo de guitarra (método Antônio Lugão) publicado como site estátic
 
 O site é protegido por um login simples baseado em `localStorage` (chave `npml-guitar-auth`), válido por 90 dias por navegador. Não há backend nem autenticação real — é apenas uma barreira leve contra acesso casual, já que o conteúdo é pessoal.
 
+## Tema claro/escuro
+
+Todas as páginas têm um alternador de tema (☀️/🌙) — na barra superior das páginas internas, e no canto da tela em `login.html`. Sem escolha manual, o tema segue a preferência do sistema (`prefers-color-scheme`); ao clicar no alternador, a escolha é salva em `localStorage` (chave `npml-guitar-theme`) e passa a valer em todas as páginas, até ser trocada de novo.
+
 ## Diagramas de arpejos
 
 A página `diagramas.html` desenha o braço da guitarra em SVG e mostra **apenas as notas da seleção ativa** (ex.: só T·3·5 no arpejo maior, só as 5 notas da pentatônica). Controles:
@@ -32,7 +36,7 @@ A página `acordes.html` mostra o acorde de Dó em doze roupagens (tríade, C7, 
 
 ## Stack
 
-HTML, CSS e JavaScript vanilla, sem dependências ou etapa de build. Publicado via GitHub Pages a partir do branch `main`.
+HTML, CSS e JavaScript vanilla, sem dependências ou etapa de build. Tokens de tema (cores, tipografia, sombra) e os componentes comuns (barra superior, alternador de tema, tipografia base) ficam centralizados em `style.css`, importado por todas as páginas; cada página mantém em seu próprio `<style>` apenas o CSS específico dela (layout de conteúdo e, quando existem, tokens de cor extras como os da grade do braço). Publicado via GitHub Pages a partir do branch `main`.
 
 ## Rodando localmente
 
