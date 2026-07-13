@@ -1,6 +1,6 @@
 # npmlguitar.github.io
 
-Kit de estudo de guitarra (método Antônio Lugão) publicado como site estático — sem build, sem dependências, só HTML/CSS/JS puro. Serve como material pessoal de prática: teoria, rotina semanal e diagramas interativos de braço.
+Kit de estudo de guitarra (método Antônio Lugão) publicado como site estático — sem build, sem dependências, só HTML/CSS/JS puro. Serve como material pessoal de prática: teoria, rotina semanal e diagramas interativos de braço e de acordes.
 
 ## Páginas
 
