@@ -172,10 +172,13 @@
       degs:[null,'1','3','♭7','♯9',null] },
     { label:'C°',     sub:'diminuto',                              formula:'1 · ♭3 · ♭5',         baseFret:3, frets:[null,3,4,5,4,null], fingers:[null,1,2,4,3,null],
       degs:[null,'1','♭5','1','♭3',null] },
-    { label:'Cø',     sub:'meio-diminuto (m7♭5)',                  formula:'1 · ♭3 · ♭5 · ♭7',    baseFret:1, frets:[null,1,1,3,1,2],    fingers:[null,null,null,4,null,2], barre:{fret:1, from:1, to:4},
-      degs:[null,'♭7','♭3','♭7','1','♭5'] }
+    { label:'Cø',     sub:'meio-diminuto (m7♭5)',                  formula:'1 · ♭3 · ♭5 · ♭7',    baseFret:3, frets:[null,3,4,3,4,null], fingers:[null,null,3,null,4,null], barre:{fret:3, from:1, to:3},
+      degs:[null,'1','♭5','♭7','♭3',null] }
   ];
   var ROOTS = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  // grafia correta das notas por grau (evita usar só sustenidos no modo "Notas")
+  var NOTE_BY_DEG = { '1':'C', '3':'E', '5':'G', '6':'A', '7':'B', '9':'D',
+    '♭3':'E♭', '♭5':'G♭', '♭7':'B♭', '♯9':'D♯' };
   var state = { display: 'dedos' };
 
   function buildChordSVG(ch){
@@ -211,7 +214,7 @@
       else if(fm === 0){
         var openLbl = 'o';
         if(state.display === 'graus'){ openLbl = ch.degs[m] || 'o'; }
-        else if(state.display === 'notas'){ var openIv = ((STRINGS_OPEN[m]+0)%12+12)%12; openLbl = ROOTS[openIv]; }
+        else if(state.display === 'notas'){ var openIv = ((STRINGS_OPEN[m]+0)%12+12)%12; openLbl = NOTE_BY_DEG[ch.degs[m]] || ROOTS[openIv]; }
         s += '<text class="cb-mark" x="'+x(m)+'" y="'+(topPad-14)+'">'+openLbl+'</text>';
       }
     }
@@ -233,7 +236,7 @@
       var label = '';
       if(state.display === 'dedos'){ label = ch.fingers[st] ? String(ch.fingers[st]) : ''; }
       else if(state.display === 'graus'){ label = ch.degs[st] || ''; }
-      else { label = ROOTS[iv]; }
+      else { label = NOTE_BY_DEG[ch.degs[st]] || ROOTS[iv]; }
       s += '<g class="note '+cls+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>' + (label ? '<text x="'+cx+'" y="'+cy+'">'+label+'</text>' : '') + '</g>';
     }
     s += '</svg>';

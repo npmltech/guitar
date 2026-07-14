@@ -149,7 +149,7 @@
 
   <div class="tip">
     <b>Como praticar as 5 posições:</b>
-    <p><b>Arpejos e tétrades</b>: escolha uma forma — C, A, G, E ou D — no seletor "Posição (CAGED)". Cada uma mostra só o grip real daquele acorde (uma nota por corda), pronto pra tocar com a mão. São as 5 formas clássicas do sistema CAGED, deslizadas até a tônica escolhida. <b>Pentatônica</b>: as posições 1-5 mostram a caixa de escala ao redor de cada tônica no braço (várias notas por corda, como de costume). Troque a tônica para transpor pelo ciclo de quartas (C → F → B♭ …).</p>
+    <p><b>Arpejos e tétrades</b>: escolha uma forma — C, A, G, E ou D — no seletor "Posição (CAGED)". Cada uma mostra só o grip real daquele acorde (uma nota por corda), pronto pra tocar com a mão. São as 5 formas clássicas do sistema CAGED, deslizadas até a tônica escolhida. <b>Pentatônica</b>: as mesmas letras C-A-G-E-D mostram a caixa da escala em cada forma CAGED — 2 notas por corda, com o deslize de 1 casa na corda B já embutido. Troque a tônica para transpor pelo ciclo de quartas (C → F → B♭ …).</p>
   </div>
 
   <footer>Braço horizontal · mostra somente as notas da seleção ativa · parte do kit de estudo em Dó.</footer>
@@ -182,7 +182,9 @@
   var STRINGS = [
     {n:'E', open:4}, {n:'A', open:9}, {n:'D', open:2},
     {n:'G', open:7}, {n:'B', open:11}, {n:'e', open:4}
-  ]; // topo = 6ª corda (mi grave), base = 1ª corda (mi agudo)
+  ]; // índices 0-5 = 6ª corda (mi grave) até 1ª corda (mi agudo); na exibição
+    // a linha segue direto esse índice (ver rowY): mi grave no topo, mi agudo
+    // embaixo — braço visto por cima pelo próprio músico.
 
   var ARPS = {
     maior: { name:'Arpejo maior',      formula:'1 · 3 · 5',         map:{0:'T',4:'3',7:'5'},               kind:'chord' },
@@ -296,33 +298,39 @@
     return byFret;
   }
 
-  // As 5 posições CAGED: a tônica cai em exatamente 5 casas distintas (0-11) ao longo
-  // das 6 cordas (a 1ª e a 6ª corda coincidem, por terem a mesma nota aberta "E").
-  // Cada posição é a faixa de casas entre o ponto médio para a tônica anterior e a seguinte.
-  function computeCagedPositions(root, maxFret){
-    var anchors = [];
-    STRINGS.forEach(function(str){
-      var fr = ((root - str.open) % 12 + 12) % 12;
-      if(anchors.indexOf(fr) === -1) anchors.push(fr);
-    });
-    anchors.sort(function(a,b){ return a-b; });
-    var bounds = [];
-    for(var i=0; i<anchors.length-1; i++) bounds.push(Math.floor((anchors[i]+anchors[i+1])/2));
-    var positions = [];
-    var prevEnd = 0;
-    for(var p=0; p<anchors.length; p++){
-      var end = (p < bounds.length) ? bounds[p] : maxFret;
-      positions.push({ start: prevEnd, end: Math.min(end, maxFret) });
-      prevEnd = end + 1;
+  // Caixa da pentatônica por FORMA CAGED. Deslocamento (casas lo..hi) da janela
+  // de cada forma em relação à tônica na 6ª corda. Ordem ascendente a partir da
+  // tônica na 6ª corda: E, D, C, A, G. Cada janela contém exatamente 2 notas por
+  // corda (padrão pentatônico), com o deslize de 1 casa na corda B já embutido.
+  var PENTA_BOX_OFFSET = { E:[-1,2], D:[1,5], C:[4,7], A:[6,9], G:[9,12] };
+  function computeCagedScaleBox(root, letter, maxFret){
+    var r6 = ((root - STRINGS[0].open) % 12 + 12) % 12; // tônica na 6ª corda (0-11)
+    var off = PENTA_BOX_OFFSET[letter];
+    // escolhe a oitava (deslocando de 12 em 12) cuja caixa mais aparece no braço mostrado
+    var best = null;
+    for(var k=-1; k<=1; k++){
+      var lo = r6 + off[0] + 12*k, hi = r6 + off[1] + 12*k;
+      var vis = Math.min(hi, maxFret) - Math.max(lo, 0);
+      if(best === null || vis > best.vis){ best = { start: lo, end: hi, vis: vis }; }
     }
-    return positions;
+    return { start: best.start, end: best.end };
   }
 
   function renderBoard(){
     var arp = ARPS[state.arp], map = arp.map, root = state.root;
-    var maxFret = 17, sg = 32, top = 22, nutX = 56, fw = 46, R = 11;
-    var openX = nutX - 26;
-    var W = nutX + maxFret*fw + 16, H = top + 5*sg + 30;
+    var maxFret = 17, sg = 32, top = 22, fw = 46, R = 11;
+    var leftPad = 16;
+    var nutX = leftPad + maxFret*fw;   // capotraste à DIREITA (visão de espelho de um destro)
+    var openX = nutX + 26;             // corda solta à direita do capotraste
+    var labelX = openX + 14;           // nome da corda, na ponta direita
+    var W = labelX + 16, H = top + 5*sg + 30;
+    // rowY: linha exibida = índice de corda direto (6ª corda / mi grave no topo,
+    // 1ª corda / mi agudo embaixo) — orientação de braço visto por cima pelo próprio
+    // músico destro no espelho.
+    // fretX: casa 0 (solta) à direita do capotraste; casas crescem pra esquerda
+    // (braço de um destro visto no espelho — capotraste à direita, como no lefty).
+    function rowY(st){ return top + st*sg; }
+    function fretX(fr){ return fr===0 ? openX : (nutX - (fr-0.5)*fw); }
 
     // "pos": para arpejos/tétrades (kind=chord) é a forma CAGED fixa selecionada (grip de mão real);
     // para a pentatônica (kind=scale) é a janela de casas ao redor de uma das 5 tônicas do braço.
@@ -330,36 +338,34 @@
     if(arp.kind === 'chord' && state.position !== 'all'){
       chordNotes = computeChordShapeNotes(state.arp, state.position, root);
     } else if(arp.kind === 'scale' && state.position !== 'all'){
-      scalePos = computeCagedPositions(root, maxFret)[state.position];
+      scalePos = computeCagedScaleBox(root, state.position, maxFret);
     }
     var s = '<svg class="board" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama horizontal de '+arp.name+' em '+ROOTS[root]+'">';
 
-    // strings (horizontal) + labels
+    // cordas (linhas horizontais) + rótulos à direita (ponta do capotraste)
     for(var i=0;i<6;i++){
-      var y = top + i*sg;
-      s += '<line class="fb-string" x1="'+nutX+'" y1="'+y+'" x2="'+(nutX+maxFret*fw)+'" y2="'+y+'"/>';
-      s += '<text class="fb-slabel" x="18" y="'+(y+4)+'">'+STRINGS[i].n+'</text>';
+      var y = rowY(i);
+      s += '<line class="fb-string" x1="'+leftPad+'" y1="'+y+'" x2="'+nutX+'" y2="'+y+'"/>';
+      s += '<text class="fb-slabel" x="'+labelX+'" y="'+(y+4)+'">'+STRINGS[i].n+'</text>';
     }
-    // frets (vertical) + nut
+    // casas (linhas verticais) + capotraste
     for(var f=1; f<=maxFret; f++){
-      var x = nutX + f*fw;
+      var x = nutX - f*fw;
       s += '<line class="fb-fret" x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+(top+5*sg)+'"/>';
     }
     s += '<line class="fb-nut" x1="'+nutX+'" y1="'+top+'" x2="'+nutX+'" y2="'+(top+5*sg)+'"/>';
 
-    // inlay markers (between 3rd and 4th string)
+    // marcadores de casa (entre a 3ª e a 4ª corda)
     var cy = top + 2.5*sg;
-    [3,5,7,9,15].forEach(function(f){ var x=nutX+(f-0.5)*fw; s+='<circle class="fb-marker" cx="'+x+'" cy="'+cy+'" r="4"/>'; });
-    (function(){ var x=nutX+(12-0.5)*fw; s+='<circle class="fb-marker" cx="'+x+'" cy="'+(cy-9)+'" r="4"/><circle class="fb-marker" cx="'+x+'" cy="'+(cy+9)+'" r="4"/>'; })();
-    // fret numbers (below)
-    [3,5,7,9,12,15].forEach(function(f){ var x=nutX+(f-0.5)*fw; s+='<text class="fb-fnum" x="'+x+'" y="'+(top+5*sg+22)+'">'+f+'</text>'; });
-
-    function fretX(fr){ return fr===0 ? openX : (nutX + (fr-0.5)*fw); }
+    [3,5,7,9,15].forEach(function(f){ var x=fretX(f); s+='<circle class="fb-marker" cx="'+x+'" cy="'+cy+'" r="4"/>'; });
+    (function(){ var x=fretX(12); s+='<circle class="fb-marker" cx="'+x+'" cy="'+(cy-9)+'" r="4"/><circle class="fb-marker" cx="'+x+'" cy="'+(cy+9)+'" r="4"/>'; })();
+    // números de casa (embaixo)
+    [3,5,7,9,12,15].forEach(function(f){ var x=fretX(f); s+='<text class="fb-fnum" x="'+x+'" y="'+(top+5*sg+22)+'">'+f+'</text>'; });
 
     // cadeia de posição — conecta, corda a corda, as notas da forma/posição selecionada
     if(chordNotes){
       var chainPts = chordNotes.slice().sort(function(a,b){ return a.str-b.str; })
-        .map(function(n){ return fretX(n.fret)+','+(top+n.str*sg); });
+        .map(function(n){ return fretX(n.fret)+','+rowY(n.str); });
       if(chainPts.length > 1) s += '<polyline class="fb-chain" points="'+chainPts.join(' ')+'"/>';
     } else if(scalePos){
       var chainPts2 = [];
@@ -368,7 +374,7 @@
           var csemi = (STRINGS[cst].open + cfr) % 12;
           var civ = ((csemi - root) % 12 + 12) % 12;
           if(map[civ] === undefined) continue;
-          chainPts2.push(fretX(cfr)+','+(top+cst*sg));
+          chainPts2.push(fretX(cfr)+','+rowY(cst));
         }
       }
       if(chainPts2.length > 1) s += '<polyline class="fb-chain" points="'+chainPts2.join(' ')+'"/>';
@@ -380,7 +386,7 @@
       chordNotes.forEach(function(n){
         var semi = (STRINGS[n.str].open + n.fret) % 12;
         var iv = ((semi - root) % 12 + 12) % 12;
-        var y2 = top + n.str*sg, x = fretX(n.fret);
+        var y2 = rowY(n.str), x = fretX(n.fret);
         var label = state.mode === 'note' ? ROOTS[semi] : map[iv];
         s += '<g class="note '+role(iv)+'"><circle cx="'+x+'" cy="'+y2+'" r="'+R+'"/><text x="'+x+'" y="'+y2+'">'+label+'</text></g>';
       });
@@ -390,7 +396,7 @@
           var semi = (STRINGS[st].open + fr) % 12;
           var iv = ((semi - root) % 12 + 12) % 12;
           if(map[iv] === undefined) continue;
-          var y2 = top + st*sg;
+          var y2 = rowY(st);
           var x = fretX(fr);
           var label = state.mode === 'note' ? ROOTS[semi] : map[iv];
           var inPos = (fr >= scalePos.start && fr <= scalePos.end);
@@ -405,7 +411,7 @@
           var semi2 = (STRINGS[st2].open + fr2) % 12;
           var iv2 = ((semi2 - root) % 12 + 12) % 12;
           if(map[iv2] === undefined) continue;
-          var y3 = top + st2*sg;
+          var y3 = rowY(st2);
           var x3 = fretX(fr2);
           var label2 = state.mode === 'note' ? ROOTS[semi2] : map[iv2];
           var zc = 'zone-' + zoneMap[fr2];
@@ -416,7 +422,7 @@
     }
     s += '</svg>';
     document.getElementById('board').innerHTML = s;
-    var posLabel = chordNotes ? (' · forma '+state.position) : (scalePos ? (' · posição '+(state.position+1)) : '');
+    var posLabel = (state.position !== 'all') ? (' · forma '+state.position) : '';
     document.getElementById('nowName').textContent = arp.name + ' · em ' + ROOTS[root] + posLabel;
     document.getElementById('nowFormula').textContent = arp.formula;
   }
@@ -452,17 +458,16 @@
     buildPosBtns();
   }
 
-  // Reconstrói os botões de posição: letras C-A-G-E-D para acordes/tétrades (formas fixas),
-  // números 1-5 para a pentatônica (janelas de escala). Chamado de novo sempre que o tipo muda.
+  // Botões de posição: sempre as letras CAGED (C-A-G-E-D). Para acordes/tétrades cada
+  // letra é a forma fixa (grip real); para a pentatônica é a caixa de escala daquela forma.
   function buildPosBtns(){
     var pb = document.getElementById('posBtns');
     pb.innerHTML = '';
-    var isChord = ARPS[state.arp].kind === 'chord';
-    var keys = ['all'].concat(isChord ? SHAPE_ORDER : [0,1,2,3,4]);
+    var keys = ['all'].concat(SHAPE_ORDER);
     keys.forEach(function(k){
       var b = document.createElement('button');
       b.className = 'pick' + (k===state.position?' active':'');
-      b.textContent = (k==='all') ? 'Todas' : (isChord ? k : (k+1));
+      b.textContent = (k==='all') ? 'Todas' : k;
       b.setAttribute('aria-pressed', k===state.position);
       b.onclick = function(){ state.position = k; syncActive(pb,b); renderBoard(); };
       pb.appendChild(b);
