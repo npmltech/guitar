@@ -44,6 +44,7 @@
   footer { margin-top:2.5rem; }
 
   .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.1rem 1.2rem; box-shadow:var(--shadow); margin-bottom:1.6rem; }
+  .ctrl-row { display:flex; flex-direction:column; gap:1rem; }
   .ctrl-group > .lbl { font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:.5rem; }
   .btns { display:flex; flex-wrap:wrap; gap:.4rem; }
   button.pick { font-family:var(--sans); font-size:.86rem; padding:.4rem .8rem; border:1px solid var(--line-strong); border-radius:8px; background:var(--paper-2); color:var(--ink-soft); cursor:pointer; transition:all .12s; }
@@ -51,13 +52,28 @@
   button.pick.active { background:var(--brass); border-color:var(--brass); color:#fff; font-weight:600; }
   button.pick:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
-  .chord-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem; margin-bottom:2rem; }
-  .chord-card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.1rem 1rem 1.3rem; box-shadow:var(--shadow); text-align:center; }
-  .chord-card .head { margin-bottom:.6rem; }
-  .chord-card h2 { font-family:var(--serif); font-weight:600; font-size:1.6rem; margin:0; }
-  .chord-card .sub { font-family:var(--mono); font-size:.68rem; color:var(--ink-faint); margin:.15rem 0 .4rem; }
-  .chord-card .formula { display:inline-block; font-family:var(--mono); font-size:.76rem; color:var(--brass-deep); background:var(--brass-wash); border:1px solid var(--brass); padding:.05rem .5rem; border-radius:6px; }
-  .chord-card svg.box { display:block; margin:.8rem auto 0; }
+  /* deck-of-cards grid: one deck per chord quality */
+  .deck-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap:1.6rem 1.2rem; margin-bottom:2rem; }
+  .deck { display:flex; flex-direction:column; align-items:center; }
+  .deck-head { text-align:center; margin-bottom:.6rem; }
+  .deck-head h2 { font-family:var(--serif); font-weight:600; font-size:1.5rem; margin:0; }
+  .deck-head .sub { font-family:var(--mono); font-size:.66rem; color:var(--ink-faint); margin:.15rem 0 .35rem; }
+  .deck-head .formula { display:inline-block; font-family:var(--mono); font-size:.72rem; color:var(--brass-deep); background:var(--brass-wash); border:1px solid var(--brass); padding:.05rem .5rem; border-radius:6px; }
+
+  .stack { position:relative; width:100%; max-width:230px; }
+  .card-back { position:absolute; top:9px; left:9px; right:-9px; bottom:-9px; background:var(--paper-2); border:1px solid var(--line); border-radius:14px; z-index:1; }
+  .card-front { position:relative; z-index:2; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem .9rem 1.1rem; box-shadow:var(--shadow); text-align:center; cursor:pointer; transition: transform .12s, box-shadow .12s; }
+  .card-front:hover { transform: translate(-2px,-2px); box-shadow: 0 8px 18px rgba(0,0,0,.18); }
+  .card-front:active { transform: translate(0,0); }
+  .card-front:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .pos-tag { position:absolute; top:.6rem; right:.7rem; font-family:var(--mono); font-size:.7rem; font-weight:700; color:var(--brass-deep); background:var(--brass-wash); border:1px solid var(--brass); border-radius:6px; padding:.05rem .4rem; pointer-events:none; }
+  .card-front svg.box { display:block; margin:.6rem auto 0; }
+
+  .dots { display:flex; justify-content:center; gap:.35rem; margin-top:.65rem; }
+  .dot-btn { font-family:var(--mono); font-size:.7rem; font-weight:700; width:1.6rem; height:1.6rem; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper-2); color:var(--ink-soft); cursor:pointer; transition:all .12s; }
+  .dot-btn:hover { border-color:var(--brass); color:var(--ink); }
+  .dot-btn.active { background:var(--brass); border-color:var(--brass); color:#fff; }
+  .dot-btn:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
   .fret-lbl { fill:var(--ink-faint); font:600 11px var(--mono); }
   .cb-line { stroke:var(--grid); }
@@ -79,6 +95,10 @@
   .dot.sev  { background:var(--card); border:1.8px solid var(--ink-soft); }
   .dot.ext  { background:var(--focus); }
   .bar-swatch { width:1.6rem; height:.75rem; border-radius:6px; background:var(--brass); display:inline-block; flex:none; }
+
+  .tip { margin-top:1.7rem; background:linear-gradient(180deg,var(--brass-wash),var(--card)); border:1px solid var(--brass); border-radius:12px; padding:1rem 1.2rem; font-size:.92rem; }
+  .tip b { color:var(--brass-deep); }
+  .tip p { margin:.3rem 0 0; }
 </style>
 </head>
 <body>
@@ -89,29 +109,40 @@
   <header>
     <p class="eyebrow">Kit de estudo · diagramas de acordes</p>
     <h1>12 variações de <em>Dó</em></h1>
-    <p class="lead">O acorde de Dó em doze roupagens — tríade, sétimas, sexta, extensões e as formas diminuta e meio-diminuta. Cada quadro é um braço na vertical: a pestana (quando existe) aparece como uma barra sólida cobrindo a casa do dedo 1; os demais dedos ficam marcados nas casas seguintes.</p>
+    <p class="lead">O acorde de Dó em doze roupagens — tríade, sétimas, sexta, extensões e as formas diminuta e meio-diminuta. Cada roupagem vem como um baralho de 5 cartas, uma por posição do sistema CAGED (C·A·G·E·D): clique no baralho para passar pra próxima posição, ou clique direto numa letra embaixo pra pular pra ela. O seletor "Posição" no topo troca todos os baralhos de uma vez, útil pra treinar uma forma só em todas as doze variações.</p>
   </header>
 
   <div class="panel">
-    <div class="ctrl-group">
-      <div class="lbl">Exibição</div>
-      <div class="btns" id="displayBtns"></div>
+    <div class="ctrl-row">
+      <div class="ctrl-group">
+        <div class="lbl">Exibição</div>
+        <div class="btns" id="displayBtns"></div>
+      </div>
+      <div class="ctrl-group">
+        <div class="lbl">Posição (CAGED) — aplicar a todos</div>
+        <div class="btns" id="globalPosBtns"></div>
+      </div>
     </div>
   </div>
 
-  <div class="chord-grid" id="chordGrid"></div>
+  <div class="deck-grid" id="deckGrid"></div>
 
   <div class="legend">
     <span class="li"><span class="dot root"></span> tônica (1)</span>
     <span class="li"><span class="dot core"></span> 3ª / ♭3ª / 5ª / ♭5ª</span>
     <span class="li"><span class="dot sev"></span> 7ª (maior ou menor)</span>
-    <span class="li"><span class="dot ext"></span> 6ª / 9ª</span>
-    <span class="li"><span class="bar-swatch"></span> pestana (dedo 1)</span>
+    <span class="li"><span class="dot ext"></span> 6ª / 9ª / ♯9ª</span>
+    <span class="li"><span class="bar-swatch"></span> pestana (barra de um dedo cobrindo 2+ cordas)</span>
     <span class="li"><b>x</b> corda não tocada</span>
     <span class="li"><b>o</b> corda solta</span>
   </div>
 
-  <footer>Doze roupagens do mesmo acorde · braço vertical, dedo sugerido em cada casa · parte do kit de estudo em Dó.</footer>
+  <div class="tip">
+    <b>Como usar os baralhos:</b>
+    <p>Cada baralho começa na posição <b>C</b> e segue a ordem clássica do sistema CAGED. Clicar em qualquer parte do card passa pra próxima posição na ordem C→A→G→E→D→C; as bolinhas embaixo (C·A·G·E·D) pulam direto pra uma posição específica. As 5 posições são as formas clássicas do sistema CAGED deslizadas até a tônica Dó — a mesma convenção usada em <a href="diagramas.html">diagramas.html</a>.</p>
+  </div>
+
+  <footer>Doze roupagens do mesmo acorde · 5 posições CAGED por roupagem · parte do kit de estudo em Dó.</footer>
 </div>
 
 <script>
@@ -148,37 +179,107 @@
     return 'n-core';
   }
 
-  // frets/degs: E A D G B e — null = não tocada, 0 = solta, N = casa N (absoluta)
-  var CHORDS = [
-    { label:'C',      sub:'maior',                                 formula:'1 · 3 · 5',           baseFret:1, frets:[null,3,2,0,1,0],    fingers:[null,3,2,null,1,null],
-      degs:[null,'1','3','5','1','3'] },
-    { label:'Cm',     sub:'menor',                                 formula:'1 · ♭3 · 5',          baseFret:3, frets:[null,3,5,5,4,3],    fingers:[null,null,4,3,2,null], barre:{fret:3, from:1, to:5},
-      degs:[null,'1','5','1','♭3','5'] },
-    { label:'C7',     sub:'dominante (7ª menor)',                  formula:'1 · 3 · 5 · ♭7',      baseFret:1, frets:[null,3,2,3,1,0],    fingers:[null,3,2,4,1,null],
-      degs:[null,'1','3','♭7','1','3'] },
-    { label:'Cm7',    sub:'menor com 7ª menor',                    formula:'1 · ♭3 · 5 · ♭7',     baseFret:3, frets:[null,3,5,3,4,3],    fingers:[null,null,3,null,2,null], barre:{fret:3, from:1, to:5},
-      degs:[null,'1','5','♭7','♭3','5'] },
-    { label:'C6',     sub:'maior com 6ª',                          formula:'1 · 3 · 5 · 6',       baseFret:1, frets:[null,3,2,2,1,0],    fingers:[null,4,2,3,1,null],
-      degs:[null,'1','3','6','1','3'] },
-    { label:'Cm6',    sub:'menor com 6ª',                          formula:'1 · ♭3 · 5 · 6',      baseFret:1, frets:[null,3,1,2,1,3],    fingers:[null,3,null,2,null,4], barre:{fret:1, from:2, to:4},
-      degs:[null,'1','♭3','6','1','5'] },
-    { label:'C7+',    sub:'maior com 7ª maior (maj7)',             formula:'1 · 3 · 5 · 7',       baseFret:1, frets:[null,3,2,0,0,0],    fingers:[null,3,2,null,null,null],
-      degs:[null,'1','3','5','7','3'] },
-    { label:'Cm7+',   sub:'menor com 7ª maior (m/maj7)',           formula:'1 · ♭3 · 5 · 7',      baseFret:3, frets:[null,3,5,4,4,3],    fingers:[null,null,4,2,3,null], barre:{fret:3, from:1, to:5},
-      degs:[null,'1','5','7','♭3','5'] },
-    { label:'Cadd9',  sub:'maior com 9ª (sem 7ª)',                 formula:'1 · 3 · 5 · 9',       baseFret:1, frets:[null,3,2,0,3,3],    fingers:[null,2,1,null,3,4],
-      degs:[null,'1','3','5','9','5'] },
-    { label:'C7(♯9)', sub:'dominante com 9ª aumentada (Hendrix)',  formula:'1 · 3 · ♭7 · ♯9',     baseFret:1, frets:[null,3,2,3,4,null], fingers:[null,2,1,3,4,null],
-      degs:[null,'1','3','♭7','♯9',null] },
-    { label:'C°',     sub:'diminuto',                              formula:'1 · ♭3 · ♭5',         baseFret:3, frets:[null,3,4,5,4,null], fingers:[null,1,2,4,3,null],
-      degs:[null,'1','♭5','1','♭3',null] },
-    { label:'Cø',     sub:'meio-diminuto (m7♭5)',                  formula:'1 · ♭3 · ♭5 · ♭7',    baseFret:1, frets:[null,1,1,3,1,2],    fingers:[null,null,null,4,null,2], barre:{fret:1, from:1, to:4},
-      degs:[null,'♭7','♭3','♭7','1','♭5'] }
-  ];
-  var ROOTS = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-  var state = { display: 'dedos' };
+  // Cada roupagem (qualidade do acorde de Dó) traz suas 5 posições CAGED (C·A·G·E·D),
+  // já deslizadas até a tônica Dó. frets/fingers/degs seguem E A D G B e — null = corda
+  // não tocada, 0 = corda solta, N = casa N (absoluta). bars = lista de pestanas
+  // {fret, from, to, finger} — cada uma é um dedo só cobrindo 2+ cordas adjacentes.
+  var CHORDS = {
+    'C': { label:'C', sub:'maior', formula:'1 · 3 · 5', shapes:{
+      C: { baseFret:1, frets:[null,3,2,0,1,0], fingers:[null,3,2,null,1,null], degs:[null,'1','3','5','1','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,5,5,3], fingers:[null,null,2,3,4,null], degs:[null,'1','5','1','3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[8,7,5,5,5,8], fingers:[3,2,null,null,null,4], degs:['1','3','5','1','3','1'], bars:[{fret:5, from:2, to:4, finger:1}] },
+      E: { baseFret:8, frets:[8,10,10,9,8,8], fingers:[null,3,4,2,null,null], degs:['1','5','1','3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,13,12], fingers:[null,null,1,3,4,2], degs:[null,null,'1','5','1','3'], bars:[] },
+    }},
+    'Cm': { label:'Cm', sub:'menor', formula:'1 · ♭3 · 5', shapes:{
+      C: { baseFret:1, frets:[null,3,1,0,1,null], fingers:[null,3,1,null,2,null], degs:[null,'1','♭3','5','1',null], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,5,4,3], fingers:[null,null,3,4,2,null], degs:[null,'1','5','1','♭3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[8,6,5,5,null,8], fingers:[3,2,null,null,null,4], degs:['1','♭3','5','1',null,'1'], bars:[{fret:5, from:2, to:3, finger:1}] },
+      E: { baseFret:8, frets:[8,10,10,8,8,8], fingers:[null,3,4,null,null,null], degs:['1','5','1','♭3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,13,11], fingers:[null,null,1,3,4,2], degs:[null,null,'1','5','1','♭3'], bars:[] },
+    }},
+    'C7': { label:'C7', sub:'dominante (7ª menor)', formula:'1 · 3 · 5 · ♭7', shapes:{
+      C: { baseFret:1, frets:[null,3,2,3,1,0], fingers:[null,3,2,4,1,null], degs:[null,'1','3','♭7','1','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,3,5,3], fingers:[null,null,3,null,4,null], degs:[null,'1','5','♭7','3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[null,null,5,5,5,6], fingers:[null,null,1,2,3,4], degs:[null,null,'5','1','3','♭7'], bars:[] },
+      E: { baseFret:8, frets:[8,10,8,9,8,8], fingers:[null,3,null,2,null,null], degs:['1','5','♭7','3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,11,12], fingers:[null,null,1,3,2,4], degs:[null,null,'1','5','♭7','3'], bars:[] },
+    }},
+    'Cm7': { label:'Cm7', sub:'menor com 7ª menor', formula:'1 · ♭3 · 5 · ♭7', shapes:{
+      C: { baseFret:1, frets:[null,3,1,3,null,null], fingers:[null,3,1,4,null,null], degs:[null,'1','♭3','♭7',null,null], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,3,4,3], fingers:[null,null,3,null,2,null], degs:[null,'1','5','♭7','♭3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[6,6,5,5,null,8], fingers:[2,3,null,null,null,4], degs:['♭7','♭3','5','1',null,'1'], bars:[{fret:5, from:2, to:3, finger:1}] },
+      E: { baseFret:8, frets:[8,10,8,8,8,8], fingers:[null,3,null,null,null,null], degs:['1','5','♭7','♭3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,11,11], fingers:[null,null,1,4,3,2], degs:[null,null,'1','5','♭7','♭3'], bars:[] },
+    }},
+    'C6': { label:'C6', sub:'maior com 6ª', formula:'1 · 3 · 5 · 6', shapes:{
+      C: { baseFret:1, frets:[null,3,2,2,1,0], fingers:[null,4,3,2,1,null], degs:[null,'1','3','6','1','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,5,5,5], fingers:[null,1,null,null,null,null], degs:[null,'1','5','1','3','6'], bars:[{fret:5, from:2, to:5, finger:2}] },
+      G: { baseFret:5, frets:[null,null,5,5,5,5], fingers:[null,null,null,null,null,null], degs:[null,null,'5','1','3','6'], bars:[{fret:5, from:2, to:5, finger:1}] },
+      E: { baseFret:8, frets:[8,10,null,9,10,8], fingers:[null,3,null,2,4,null], degs:['1','5',null,'3','6','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,10,12], fingers:[null,null,1,3,2,4], degs:[null,null,'1','5','6','3'], bars:[] },
+    }},
+    'Cm6': { label:'Cm6', sub:'menor com 6ª', formula:'1 · ♭3 · 5 · 6', shapes:{
+      C: { baseFret:1, frets:[null,3,1,2,null,null], fingers:[null,3,1,2,null,null], degs:[null,'1','♭3','6',null,null], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,null,4,5], fingers:[null,1,2,null,3,4], degs:[null,'1','5',null,'♭3','6'], bars:[] },
+      G: { baseFret:4, frets:[null,null,5,5,4,5], fingers:[null,null,2,3,1,4], degs:[null,null,'5','1','♭3','6'], bars:[] },
+      E: { baseFret:8, frets:[8,10,null,8,10,8], fingers:[null,3,null,null,4,null], degs:['1','5',null,'♭3','6','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,10,11], fingers:[null,null,1,4,2,3], degs:[null,null,'1','5','6','♭3'], bars:[] },
+    }},
+    'C7+': { label:'C7+', sub:'maior com 7ª maior (maj7)', formula:'1 · 3 · 5 · 7', shapes:{
+      C: { baseFret:1, frets:[null,3,2,0,0,0], fingers:[null,2,1,null,null,null], degs:[null,'1','3','5','7','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,4,5,3], fingers:[null,null,3,2,4,null], degs:[null,'1','5','7','3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[7,7,5,5,5,8], fingers:[2,3,null,null,null,4], degs:['7','3','5','1','3','1'], bars:[{fret:5, from:2, to:4, finger:1}] },
+      E: { baseFret:8, frets:[8,10,9,9,8,8], fingers:[null,4,2,3,null,null], degs:['1','5','7','3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,12,12], fingers:[null,null,1,2,3,4], degs:[null,null,'1','5','7','3'], bars:[] },
+    }},
+    'Cm7+': { label:'Cm7+', sub:'menor com 7ª maior (m/maj7)', formula:'1 · ♭3 · 5 · 7', shapes:{
+      C: { baseFret:1, frets:[null,3,1,0,0,null], fingers:[null,2,1,null,null,null], degs:[null,'1','♭3','5','7',null], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,4,4,3], fingers:[null,null,4,2,3,null], degs:[null,'1','5','7','♭3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[7,6,5,5,null,8], fingers:[3,2,null,null,null,4], degs:['7','♭3','5','1',null,'1'], bars:[{fret:5, from:2, to:3, finger:1}] },
+      E: { baseFret:8, frets:[8,10,9,8,8,8], fingers:[null,3,2,null,null,null], degs:['1','5','7','♭3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,12,11], fingers:[null,null,1,3,4,2], degs:[null,null,'1','5','7','♭3'], bars:[] },
+    }},
+    'Cadd9': { label:'Cadd9', sub:'maior com 9ª (sem 7ª)', formula:'1 · 3 · 5 · 9', shapes:{
+      C: { baseFret:1, frets:[null,3,0,0,1,0], fingers:[null,2,null,null,1,null], degs:[null,'1','9','5','1','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,5,3,3], fingers:[null,null,2,3,null,null], degs:[null,'1','5','1','9','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[8,5,5,5,5,8], fingers:[2,null,null,null,null,3], degs:['1','9','5','1','3','1'], bars:[{fret:5, from:1, to:4, finger:1}] },
+      E: { baseFret:8, frets:[10,10,10,9,8,8], fingers:[null,null,null,2,null,null], degs:['9','5','1','3','5','1'], bars:[{fret:8, from:4, to:5, finger:1}, {fret:10, from:0, to:2, finger:3}] },
+      D: { baseFret:10, frets:[null,null,10,12,13,10], fingers:[null,null,null,2,3,null], degs:[null,null,'1','5','1','9'], bars:[{fret:10, from:2, to:5, finger:1}] },
+    }},
+    'C7(#9)': { label:'C7(♯9)', sub:'dominante com 9ª aumentada (Hendrix)', formula:'1 · 3 · ♭7 · ♯9', shapes:{
+      C: { baseFret:1, frets:[null,1,1,0,1,0], fingers:[null,1,2,null,3,null], degs:[null,'♭7','♯9','5','1','3'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,3,4,3], fingers:[null,null,3,null,2,null], degs:[null,'1','5','♭7','♯9','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[6,6,5,5,5,8], fingers:[2,3,null,null,null,4], degs:['♭7','♯9','5','1','3','1'], bars:[{fret:5, from:2, to:4, finger:1}] },
+      E: { baseFret:8, frets:[8,10,8,8,8,8], fingers:[null,2,null,null,null,null], degs:['1','5','♭7','♯9','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,12,11,11], fingers:[null,null,1,4,2,3], degs:[null,null,'1','5','♭7','♯9'], bars:[] },
+    }},
+    'C°': { label:'C°', sub:'diminuto', formula:'1 · ♭3 · ♭5', shapes:{
+      C: { baseFret:1, frets:[null,3,1,null,1,2], fingers:[null,4,1,null,2,3], degs:[null,'1','♭3',null,'1','♭5'], bars:[] },
+      A: { baseFret:3, frets:[null,3,4,5,4,null], fingers:[null,1,2,4,3,null], degs:[null,'1','♭5','1','♭3',null], bars:[] },
+      G: { baseFret:5, frets:[8,6,null,5,7,8], fingers:[4,2,null,1,3,4], degs:['1','♭3',null,'1','♭5','1'], bars:[] },
+      E: { baseFret:8, frets:[8,9,10,8,null,8], fingers:[null,2,3,null,null,null], degs:['1','♭5','1','♭3',null,'1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,11,13,11], fingers:[null,null,1,2,4,3], degs:[null,null,'1','♭5','1','♭3'], bars:[] },
+    }},
+    'Cø': { label:'Cø', sub:'meio-diminuto (m7♭5)', formula:'1 · ♭3 · ♭5 · ♭7', shapes:{
+      C: { baseFret:1, frets:[null,1,1,null,1,2], fingers:[null,1,2,null,3,4], degs:[null,'♭7','♭3',null,'1','♭5'], bars:[] },
+      A: { baseFret:3, frets:[null,3,4,3,4,null], fingers:[null,1,3,2,4,null], degs:[null,'1','♭5','♭7','♭3',null], bars:[] },
+      G: { baseFret:5, frets:[6,6,null,5,7,8], fingers:[null,null,null,1,3,4], degs:['♭7','♭3',null,'1','♭5','1'], bars:[{fret:6, from:0, to:1, finger:2}] },
+      E: { baseFret:8, frets:[8,9,8,8,null,8], fingers:[null,2,null,null,null,null], degs:['1','♭5','♭7','♭3',null,'1'], bars:[{fret:8, from:0, to:5, finger:1}] },
+      D: { baseFret:10, frets:[null,null,10,11,11,11], fingers:[null,null,1,2,3,4], degs:[null,null,'1','♭5','♭7','♭3'], bars:[] },
+    }},
+  };
+  var ORDER = ["C","Cm","C7","Cm7","C6","Cm6","C7+","Cm7+","Cadd9","C7(#9)","C°","Cø"];
+  var SHAPE_ORDER = ["C","A","G","E","D"];
 
-  function buildChordSVG(ch){
+  var ROOTS = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  // grafia correta das notas por grau (evita usar só sustenidos no modo "Notas")
+  var NOTE_BY_DEG = { '1':'C', '3':'E', '5':'G', '6':'A', '7':'B', '9':'D',
+    '♭3':'E♭', '♭5':'G♭', '♭7':'B♭', '♯9':'D♯' };
+  var state = { display: 'dedos', positions: {} };
+  ORDER.forEach(function(qk){ state.positions[qk] = 'C'; });
+
+  function buildChordSVG(ch, ariaLabel){
     var cellW = 32, cellH = 34, topPad = 30, leftPad = 30, rightPad = 20, bottomPad = 10, R = 10;
     var W = leftPad + 5*cellW + rightPad;
     var H = topPad + 4*cellH + bottomPad;
@@ -186,7 +287,7 @@
     var yRow = function(fret){ return topPad + (fret - ch.baseFret + 0.5)*cellH; };
     var yLine = function(r){ return topPad + r*cellH; };
 
-    var s = '<svg class="box" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de '+ch.label+'">';
+    var s = '<svg class="box" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+ariaLabel+'">';
 
     // linhas verticais (cordas)
     for(var i=0;i<6;i++){
@@ -211,46 +312,93 @@
       else if(fm === 0){
         var openLbl = 'o';
         if(state.display === 'graus'){ openLbl = ch.degs[m] || 'o'; }
-        else if(state.display === 'notas'){ var openIv = ((STRINGS_OPEN[m]+0)%12+12)%12; openLbl = ROOTS[openIv]; }
+        else if(state.display === 'notas'){ var openIv = ((STRINGS_OPEN[m]+0)%12+12)%12; openLbl = NOTE_BY_DEG[ch.degs[m]] || ROOTS[openIv]; }
         s += '<text class="cb-mark" x="'+x(m)+'" y="'+(topPad-14)+'">'+openLbl+'</text>';
       }
     }
-    // pestana
-    if(ch.barre){
-      var bx1 = x(ch.barre.from), bx2 = x(ch.barre.to), by = yRow(ch.barre.fret);
+    // pestanas (uma ou mais — cada uma é um dedo só cobrindo 2+ cordas adjacentes)
+    ch.bars.forEach(function(bar){
+      var bx1 = x(bar.from), bx2 = x(bar.to), by = yRow(bar.fret);
       s += '<rect class="barre-bar" x="'+(bx1-R)+'" y="'+(by-R)+'" width="'+(bx2-bx1+2*R)+'" height="'+(2*R)+'" rx="'+R+'"/>';
       if(state.display === 'dedos'){
-        s += '<text class="barre-lbl" x="'+((bx1+bx2)/2)+'" y="'+by+'">1</text>';
+        s += '<text class="barre-lbl" x="'+((bx1+bx2)/2)+'" y="'+by+'">'+bar.finger+'</text>';
       }
-    }
+    });
     // notas presas
     for(var st=0; st<6; st++){
       var fr = ch.frets[st];
       if(fr === null || fr === 0) continue;
+      // No modo "Dedos", uma corda coberta por uma pestana já é representada pela barra
+      // (e pelo número do dedo centralizado nela) — não desenha o ponto solto por cima,
+      // que só sujaria a barra e chegaria a tapar o "1". Nos modos "Graus"/"Notas" o ponto
+      // continua, pois ali cada corda mostra seu próprio grau/nota mesmo sob a pestana.
+      var underBar = ch.bars.some(function(bar){ return bar.fret===fr && st>=bar.from && st<=bar.to; });
+      if(state.display === 'dedos' && underBar) continue;
       var iv = ((STRINGS_OPEN[st] + fr) % 12 + 12) % 12; // 0 = Dó (tônica)
       var cls = role(iv);
       var cy = yRow(fr), cx = x(st);
       var label = '';
       if(state.display === 'dedos'){ label = ch.fingers[st] ? String(ch.fingers[st]) : ''; }
       else if(state.display === 'graus'){ label = ch.degs[st] || ''; }
-      else { label = ROOTS[iv]; }
+      else { label = NOTE_BY_DEG[ch.degs[st]] || ROOTS[iv]; }
       s += '<g class="note '+cls+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>' + (label ? '<text x="'+cx+'" y="'+cy+'">'+label+'</text>' : '') + '</g>';
     }
     s += '</svg>';
     return s;
   }
 
-  var grid = document.getElementById('chordGrid');
-  function renderGrid(){
+  var grid = document.getElementById('deckGrid');
+  function renderDecks(){
     grid.innerHTML = '';
-    CHORDS.forEach(function(ch){
-      var card = document.createElement('div');
-      card.className = 'chord-card';
-      card.innerHTML =
-        '<div class="head"><h2>'+ch.label+'</h2><div class="sub">'+ch.sub+'</div><span class="formula">'+ch.formula+'</span></div>' +
-        buildChordSVG(ch);
-      grid.appendChild(card);
+    ORDER.forEach(function(qk){
+      var chord = CHORDS[qk];
+      var posLetter = state.positions[qk];
+      var voicing = chord.shapes[posLetter];
+      var ariaLabel = 'Diagrama de ' + chord.label + ', posição ' + posLetter;
+
+      var deck = document.createElement('div');
+      deck.className = 'deck';
+      deck.innerHTML =
+        '<div class="deck-head"><h2>'+chord.label+'</h2><div class="sub">'+chord.sub+'</div><span class="formula">'+chord.formula+'</span></div>' +
+        '<div class="stack">' +
+          '<div class="card-back" aria-hidden="true"></div>' +
+          '<div class="card-front" tabindex="0" role="button" aria-label="'+ariaLabel+'. Clique para avançar de posição.">' +
+            '<span class="pos-tag">'+posLetter+'</span>' +
+            buildChordSVG(voicing, ariaLabel) +
+          '</div>' +
+        '</div>' +
+        '<div class="dots"></div>';
+
+      function advance(){
+        var idx = SHAPE_ORDER.indexOf(state.positions[qk]);
+        state.positions[qk] = SHAPE_ORDER[(idx+1) % SHAPE_ORDER.length];
+        renderDecks();
+      }
+      var front = deck.querySelector('.card-front');
+      front.addEventListener('click', advance);
+      front.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); advance(); }
+      });
+
+      var dotsEl = deck.querySelector('.dots');
+      SHAPE_ORDER.forEach(function(letter){
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'dot-btn' + (letter===posLetter ? ' active' : '');
+        dot.textContent = letter;
+        dot.setAttribute('aria-label', 'Posição '+letter+' de '+chord.label);
+        dot.setAttribute('aria-pressed', letter===posLetter);
+        dot.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          state.positions[qk] = letter;
+          renderDecks();
+        });
+        dotsEl.appendChild(dot);
+      });
+
+      grid.appendChild(deck);
     });
+    syncGlobalPosBtns();
   }
 
   var DISPLAY_MODES = ['dedos','graus','notas'];
@@ -265,12 +413,37 @@
       state.display = k;
       db.querySelectorAll('button').forEach(function(x){ x.classList.remove('active'); x.setAttribute('aria-pressed','false'); });
       b.classList.add('active'); b.setAttribute('aria-pressed','true');
-      renderGrid();
+      renderDecks();
     };
     db.appendChild(b);
   });
 
-  renderGrid();
+  // Seletor global de posição: aplica a mesma letra CAGED a todos os 12 baralhos de uma
+  // vez (útil pra treinar uma forma só em todas as variações); cada baralho continua
+  // navegável individualmente depois via clique no card ou nas bolinhas.
+  var gpb = document.getElementById('globalPosBtns');
+  SHAPE_ORDER.forEach(function(letter){
+    var b = document.createElement('button');
+    b.className = 'pick';
+    b.textContent = letter;
+    b.setAttribute('aria-label', 'Aplicar posição '+letter+' a todos os acordes');
+    b.onclick = function(){
+      ORDER.forEach(function(qk){ state.positions[qk] = letter; });
+      renderDecks();
+    };
+    gpb.appendChild(b);
+  });
+  function syncGlobalPosBtns(){
+    var allSame = ORDER.every(function(qk){ return state.positions[qk] === state.positions[ORDER[0]]; });
+    var current = allSame ? state.positions[ORDER[0]] : null;
+    Array.prototype.forEach.call(gpb.querySelectorAll('button'), function(b){
+      var active = b.textContent === current;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', active);
+    });
+  }
+
+  renderDecks();
 </script>
 </body>
 </html>
