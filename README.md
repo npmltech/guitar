@@ -6,7 +6,7 @@ Kit de estudo de guitarra (método Antônio Lugão) publicado como site estátic
 
 | Arquivo | O que é |
 | --- | --- |
-| `index.html` | Central de estudos — menu de entrada com links para as peças abaixo. |
+| `index.html` | Central de estudos — menu de entrada com links para as peças abaixo e painel de progresso consolidado (Fundamentos + Cronograma). |
 | `cronograma.html` | Rotina semanal de estudo (construção, pentatônicas, campo/modos, aplicação de arpejos, checklist de cobertura). |
 | `fundamentos.html` | Guia de teoria em Dó — arpejos, pentatônica, tétrades, derivação modal e ponte qualidade→modo. |
 | `diagramas.html` | Diagrama de braço horizontal interativo para arpejos — escolha o tipo de estudo e a tônica; alterna entre graus (T·3·5…) e nomes de notas reais. |
@@ -28,7 +28,7 @@ A página `diagramas.html` desenha o braço da guitarra em SVG e mostra **apenas
 - **Seleção de estudo** — tipo de arpejo/escala (maior, menor, pentatônica, tétrades 7M/7/m7/m7♭5).
 - **Tônica** — as 12 notas cromáticas.
 - **Exibição** — alterna os rótulos dos pontos entre **graus** (T, 3, 5, 7...) e **notas reais** (C, E, G...).
-- **Posição (CAGED)** — por padrão, cada nota do braço já vem colorida pela posição CAGED a que pertence (C·A·G·E·D). Para arpejos/tétrades, selecionar uma letra isola o grip real daquela forma (uma nota por corda, tocável com a mão) com uma linha conectando as notas; para a pentatônica, os números 1-5 isolam a caixa de escala ao redor de cada tônica.
+- **Posição (CAGED)** — por padrão, cada nota do braço já vem colorida pela posição CAGED a que pertence (C·A·G·E·D). Para arpejos/tétrades, selecionar uma letra isola o grip real daquela forma (uma nota por corda, tocável com a mão) com uma linha conectando as notas; para a pentatônica, as letras C·A·G·E·D isolam a caixa de escala ao redor de cada tônica.
 
 ## 12 variações de Dó
 
@@ -74,3 +74,47 @@ Use esta lista sempre que alterar textos, tabelas, fórmulas ou exemplos.
 	- renderização dos diagramas em desktop e mobile
 
 Critério final: conteúdo musical coerente + texto claro + interface consistente.
+
+## Checklist operacional por página
+
+### index.html
+
+- Valida o gate: sem sessão válida, redireciona para `login.html?next=index.html`.
+- Garante que o botão `encerrar sessão` remove o token e volta para login.
+- Confirma que os links para as 4 páginas principais funcionam.
+
+### login.html
+
+- Tema inicial segue preferências (salvo em `npml-guitar-theme` ou sistema).
+- Login válido salva `{ ok: true, ts }` em `npml-guitar-auth` e redireciona para `next` permitido.
+- Login inválido mostra mensagem de erro sem recarregar a página.
+
+### cronograma.html
+
+- Conferir consistência das tabelas de exemplo modal (campos, modos e acordes diatônicos).
+- Confirmar persistência dos checkboxes em `cronograma-guitarra-v1`.
+- Validar responsividade dos cards semanais e da tabela.
+
+### fundamentos.html
+
+- Conferir fórmulas e nomenclatura de arpejos/tétrades/modos.
+- Confirmar coerência entre qualidade do acorde e modo associado na tabela ponte.
+- Confirmar persistência do tracker em `npml-guitar-track-v1`.
+
+### diagramas.html
+
+- Conferir renderização de notas por seleção (tipo, tônica, exibição e posição).
+- Validar posições CAGED para arpejos/tétrades e caixas da pentatônica.
+- Confirmar contraste de cores das notas em tema claro e escuro.
+
+### acordes.html
+
+- Conferir as 12 variações e as 5 posições CAGED em cada baralho.
+- Validar alternância de exibição (`Dedos`, `Graus`, `Notas`) e navegação por posição.
+- Testar áudio de acorde e nota individual (com e sem SoundFont carregado).
+
+### style.css
+
+- Verificar que tokens globais estão sendo respeitados em todas as páginas.
+- Checar foco visível (`:focus-visible`) em elementos interativos principais.
+- Revisar contraste mínimo para legibilidade de texto e controles.

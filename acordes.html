@@ -1,30 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script>
-(function(){
-  var STORE_KEY = "npml-guitar-auth";
-  var MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
-  try {
-    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
-    var ok = saved && saved.ok && (Date.now() - saved.ts) < MAX_AGE_MS;
-    if (!ok) {
-      var here = location.pathname.split("/").pop() || "index.html";
-      location.replace("login.html?next=" + encodeURIComponent(here));
-    }
-  } catch(e) { location.replace("login.html"); }
-})();
-</script>
-<script>
-(function(){
-  var KEY = "npml-guitar-theme";
-  try {
-    var saved = localStorage.getItem(KEY);
-    var theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    document.documentElement.dataset.theme = theme;
-  } catch(e) {}
-})();
-</script>
+<script src="app-common.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>12 Variações de Dó — Diagramas de Acordes</title>
@@ -154,27 +131,7 @@
 </div>
 
 <script>
-  document.getElementById("logout").addEventListener("click", function(ev){
-    ev.preventDefault();
-    localStorage.removeItem("npml-guitar-auth");
-    location.href = "login.html";
-  });
-
-  (function(){
-    var KEY = "npml-guitar-theme";
-    var btn = document.getElementById("theme-toggle");
-    function apply(theme){
-      document.documentElement.dataset.theme = theme;
-      btn.textContent = theme === "dark" ? "☀️" : "🌙";
-      btn.setAttribute("aria-label", theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro");
-    }
-    apply(document.documentElement.dataset.theme || "light");
-    btn.addEventListener("click", function(){
-      var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-      try { localStorage.setItem(KEY, next); } catch(e) {}
-      apply(next);
-    });
-  })();
+  if (window.NpmlGuitarApp) window.NpmlGuitarApp.initPageUi();
 </script>
 <script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
 <script src="https://surikov.github.io/webaudiofontdata/sound/0250_FluidR3_GM_sf2_file.js"></script>
