@@ -105,7 +105,15 @@
 
   function redirectTarget() {
     var params = new URLSearchParams(location.search);
-    return params.get("next") || "index.html";
+    var next = params.get("next") || "index.html";
+    var allow = {
+      "index.html": true,
+      "cronograma.html": true,
+      "fundamentos.html": true,
+      "diagramas.html": true,
+      "acordes.html": true
+    };
+    return allow[next] ? next : "index.html";
   }
 
   document.getElementById("loginForm").addEventListener("submit", async function(ev){
@@ -114,7 +122,9 @@
     var pass = document.getElementById("pass").value;
     var hash = await sha256Hex(user + ":" + pass);
     if (hash === AUTH_HASH) {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ ok:true, ts: Date.now() }));
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify({ ok:true, ts: Date.now() }));
+      } catch(e) {}
       location.href = redirectTarget();
     } else {
       document.getElementById("err").classList.add("show");

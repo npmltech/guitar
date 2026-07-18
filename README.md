@@ -45,3 +45,32 @@ Basta abrir os arquivos `.html` direto no navegador, ou servir a pasta com qualq
 ```bash
 python3 -m http.server 8000
 ```
+
+## Checklist de revisão musical e editorial
+
+Use esta lista sempre que alterar textos, tabelas, fórmulas ou exemplos.
+
+- Conferir se os nomes das qualidades batem com as fórmulas:
+	- maior = 1 3 5
+	- menor = 1 ♭3 5
+	- 7M = 1 3 5 7
+	- 7 (dominante) = 1 3 5 ♭7
+	- m7 = 1 ♭3 5 ♭7
+	- m7(♭5) = 1 ♭3 ♭5 ♭7
+- Conferir coerência entre campo harmônico, modo e acorde (ex.: em C maior, VI grau = Am7 = Eólio).
+- Conferir se os exemplos de aplicação de arpejos usam notas e acordes diatônicos do mesmo campo.
+- Conferir se grafia de notas e acidentes está consistente em cada contexto (ex.: usar B♭ quando o texto está em contexto de bemóis).
+- Conferir se o texto evita ambiguidade pedagógica e mantém termos consistentes entre páginas (tônica, grau, forma, posição, tétrade, arpejo).
+- Conferir se a copy segue o mesmo tom (português BR, direto, didático, sem jargão desnecessário).
+- Conferir acessibilidade mínima após mudanças textuais:
+	- botões com aria-label quando aplicável
+	- foco visível em controles interativos
+	- sem depender só de cor para significado
+- Testar fluxo funcional após alterações:
+	- login válido e redirecionamento para página interna
+	- logout redirecionando para login
+	- alternância de tema em todas as páginas
+	- persistência de checklists no localStorage
+	- renderização dos diagramas em desktop e mobile
+
+Critério final: conteúdo musical coerente + texto claro + interface consistente.
