@@ -67,6 +67,11 @@
   .card-front:active { transform: translate(0,0); }
   .card-front:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
   .pos-tag { position:absolute; top:.6rem; right:.7rem; font-family:var(--mono); font-size:.7rem; font-weight:700; color:var(--brass-deep); background:var(--brass-wash); border:1px solid var(--brass); border-radius:6px; padding:.05rem .4rem; pointer-events:none; }
+  .audio-btn { position:absolute; top:.55rem; left:.6rem; width:1.9rem; height:1.9rem; border-radius:50%; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink); display:grid; place-items:center; cursor:pointer; box-shadow:0 1px 0 rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.14); }
+  .audio-btn:hover { border-color:var(--brass); color:var(--brass-deep); transform:translateY(-1px); }
+  .audio-btn:active { transform:translateY(0); }
+  .audio-btn:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .audio-btn svg { width:1rem; height:1rem; display:block; fill:currentColor; }
   .card-front svg.box { display:block; margin:.6rem auto 0; }
 
   .dots { display:flex; justify-content:center; gap:.35rem; margin-top:.65rem; }
@@ -80,6 +85,9 @@
   .cb-nut { stroke:var(--ink); stroke-width:5; stroke-linecap:round; }
   .cb-mark { fill:var(--ink-faint); font:700 12px var(--mono); text-anchor:middle; }
   .note text { font:700 11px var(--mono); text-anchor:middle; dominant-baseline:central; }
+  .note { cursor:pointer; }
+  .note circle { transition: transform .08s ease; }
+  .note:hover circle { transform: scale(1.06); }
   .n-root circle { fill:var(--brass); } .n-root text { fill:#fff; }
   .n-core circle { fill:var(--ink); } .n-core text { fill:var(--paper-2); }
   .n-sev  circle { fill:var(--card); stroke:var(--ink-soft); stroke-width:1.8; } .n-sev text { fill:var(--ink); }
@@ -139,7 +147,7 @@
 
   <div class="tip">
     <b>Como usar os baralhos:</b>
-    <p>Cada baralho começa na posição <b>C</b> e segue a ordem clássica do sistema CAGED. Clicar em qualquer parte do card passa pra próxima posição na ordem C→A→G→E→D→C; as bolinhas embaixo (C·A·G·E·D) pulam direto pra uma posição específica. As 5 posições são as formas clássicas do sistema CAGED deslizadas até a tônica Dó — a mesma convenção usada em <a href="diagramas.html">diagramas.html</a>.</p>
+    <p>Cada baralho começa na posição <b>C</b> e segue a ordem clássica do sistema CAGED. Clicar em qualquer parte do card passa pra próxima posição na ordem C→A→G→E→D→C; as bolinhas embaixo (C·A·G·E·D) pulam direto pra uma posição específica. As 5 posições são as formas clássicas do sistema CAGED deslizadas até a tônica Dó — a mesma convenção usada em <a href="diagramas.html">diagramas.html</a>. Você também pode clicar em cada nota do diagrama para ouvir o som dela.</p>
   </div>
 
   <footer>Doze roupagens do mesmo acorde · 5 posições CAGED por roupagem · parte do kit de estudo em Dó.</footer>
@@ -168,15 +176,104 @@
     });
   })();
 </script>
+<script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
+<script src="https://surikov.github.io/webaudiofontdata/sound/0250_FluidR3_GM_sf2_file.js"></script>
 <script>
   // Cordas grave->aguda, com a nota solta em semitons a partir de Dó (mesma convenção de diagramas.html)
   var STRINGS_OPEN = [4,9,2,7,11,4]; // E A D G B e
+  // MIDI real das cordas soltas em afinação padrão (E2 A2 D3 G3 B3 E4)
+  var STRINGS_OPEN_MIDI = [40,45,50,55,59,64];
 
   function role(iv){
     if(iv===0) return 'n-root';
     if(iv===2||iv===9) return 'n-ext';
     if(iv===10||iv===11) return 'n-sev';
     return 'n-core';
+  }
+
+  var audioCtx = null;
+  var audioBus = null;
+  var sfPlayer = null;
+  var sfPreset = null;
+  var sfReady = false;
+  function getAudioCtx(){
+    if(!audioCtx){
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) return null;
+      audioCtx = new Ctx();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function getAudioBus(ctx){
+    if(audioBus) return audioBus;
+    var bus = ctx.createGain();
+    var midEq = ctx.createBiquadFilter();
+    midEq.type = 'peaking';
+    midEq.frequency.value = 1200;
+    midEq.Q.value = 0.9;
+    midEq.gain.value = 2.8;
+    bus.connect(midEq);
+    midEq.connect(ctx.destination);
+    audioBus = bus;
+    return audioBus;
+  }
+  function setupSoundFont(ctx){
+    if(sfReady) return true;
+    if(!window.WebAudioFontPlayer || !window._tone_0250_FluidR3_GM_sf2_file) return false;
+    sfPlayer = new window.WebAudioFontPlayer();
+    sfPreset = window._tone_0250_FluidR3_GM_sf2_file;
+    sfPlayer.loader.decodeAfterLoading(ctx, '_tone_0250_FluidR3_GM_sf2_file');
+    sfReady = true;
+    return true;
+  }
+  function midiToHz(midi){
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+  function playSynthLayer(ctx, midi, duration, level){
+    var now = ctx.currentTime;
+    var dur = duration || 0.6;
+    var gainLevel = level || 0.03;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = midiToHz(midi);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(gainLevel, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.connect(gain);
+    gain.connect(getAudioBus(ctx));
+    osc.start(now);
+    osc.stop(now + dur + 0.02);
+  }
+  function playMidi(midi, duration){
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var dur = duration || 0.6;
+    if(setupSoundFont(ctx)){
+      sfPlayer.queueWaveTable(ctx, getAudioBus(ctx), sfPreset, ctx.currentTime, midi, dur, 0.45);
+      // Camada discreta de reforço para definição de altura sem excesso de brilho.
+      playSynthLayer(ctx, midi, dur, midi >= 64 ? 0.018 : 0.016);
+      return;
+    }
+    playSynthLayer(ctx, midi, dur, 0.16);
+  }
+  function playableMidis(ch){
+    var mids = [];
+    for(var st=0; st<6; st++){
+      var fr = ch.frets[st];
+      if(fr === null) continue;
+      mids.push(STRINGS_OPEN_MIDI[st] + fr);
+    }
+    return mids;
+  }
+  function playChord(ch){
+    var mids = playableMidis(ch);
+    for(var i=0;i<mids.length;i++){
+      (function(midi, step){
+        setTimeout(function(){ playMidi(midi, 0.55); }, step * 55);
+      })(mids[i], i);
+    }
   }
 
   // Cada roupagem (qualidade do acorde de Dó) traz suas 5 posições CAGED (C·A·G·E·D),
@@ -227,44 +324,44 @@
       D: { baseFret:10, frets:[null,null,10,12,10,11], fingers:[null,null,1,4,2,3], degs:[null,null,'1','5','6','♭3'], bars:[] },
     }},
     'C7+': { label:'C7+', sub:'maior com 7ª maior (maj7)', formula:'1 · 3 · 5 · 7', shapes:{
-      C: { baseFret:1, frets:[null,3,2,0,0,0], fingers:[null,2,1,null,null,null], degs:[null,'1','3','5','7','3'], bars:[] },
+      C: { baseFret:1, frets:[null,3,2,0,0,0], fingers:[null,3,2,null,null,null], degs:[null,'1','3','5','7','3'], bars:[] },
       A: { baseFret:3, frets:[null,3,5,4,5,3], fingers:[null,null,3,2,4,null], degs:[null,'1','5','7','3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
-      G: { baseFret:5, frets:[7,7,5,5,5,8], fingers:[2,3,null,null,null,4], degs:['7','3','5','1','3','1'], bars:[{fret:5, from:2, to:4, finger:1}] },
+      G: { baseFret:5, frets:[null,null,5,5,5,7], fingers:[null,null,1,2,3,4], degs:[null,null,'5','1','3','7'], bars:[] },
       E: { baseFret:8, frets:[8,10,9,9,8,8], fingers:[null,4,2,3,null,null], degs:['1','5','7','3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
       D: { baseFret:10, frets:[null,null,10,12,12,12], fingers:[null,null,1,2,3,4], degs:[null,null,'1','5','7','3'], bars:[] },
     }},
     'Cm7+': { label:'Cm7+', sub:'menor com 7ª maior (m/maj7)', formula:'1 · ♭3 · 5 · 7', shapes:{
-      C: { baseFret:1, frets:[null,3,1,0,0,null], fingers:[null,2,1,null,null,null], degs:[null,'1','♭3','5','7',null], bars:[] },
-      A: { baseFret:3, frets:[null,3,5,4,4,3], fingers:[null,null,4,2,3,null], degs:[null,'1','5','7','♭3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
-      G: { baseFret:5, frets:[7,6,5,5,null,8], fingers:[3,2,null,null,null,4], degs:['7','♭3','5','1',null,'1'], bars:[{fret:5, from:2, to:3, finger:1}] },
+      C: { baseFret:1, frets:[null,3,1,0,0,null], fingers:[null,3,1,null,null,null], degs:[null,'1','♭3','5','7',null], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,4,4,3], fingers:[null,null,3,2,4,null], degs:[null,'1','5','7','♭3','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:4, frets:[null,null,5,5,4,7], fingers:[null,null,2,3,1,4], degs:[null,null,'5','1','♭3','7'], bars:[] },
       E: { baseFret:8, frets:[8,10,9,8,8,8], fingers:[null,3,2,null,null,null], degs:['1','5','7','♭3','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
       D: { baseFret:10, frets:[null,null,10,12,12,11], fingers:[null,null,1,3,4,2], degs:[null,null,'1','5','7','♭3'], bars:[] },
     }},
     'Cadd9': { label:'Cadd9', sub:'maior com 9ª (sem 7ª)', formula:'1 · 3 · 5 · 9', shapes:{
-      C: { baseFret:1, frets:[null,3,0,0,1,0], fingers:[null,2,null,null,1,null], degs:[null,'1','9','5','1','3'], bars:[] },
-      A: { baseFret:3, frets:[null,3,5,5,3,3], fingers:[null,null,2,3,null,null], degs:[null,'1','5','1','9','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
-      G: { baseFret:5, frets:[8,5,5,5,5,8], fingers:[2,null,null,null,null,3], degs:['1','9','5','1','3','1'], bars:[{fret:5, from:1, to:4, finger:1}] },
-      E: { baseFret:8, frets:[10,10,10,9,8,8], fingers:[null,null,null,2,null,null], degs:['9','5','1','3','5','1'], bars:[{fret:8, from:4, to:5, finger:1}, {fret:10, from:0, to:2, finger:3}] },
-      D: { baseFret:10, frets:[null,null,10,12,13,10], fingers:[null,null,null,2,3,null], degs:[null,null,'1','5','1','9'], bars:[{fret:10, from:2, to:5, finger:1}] },
+      C: { baseFret:1, frets:[null,3,2,0,3,3], fingers:[null,2,1,null,3,4], degs:[null,'1','3','5','9','5'], bars:[] },
+      A: { baseFret:3, frets:[null,3,5,5,3,3], fingers:[null,null,3,4,null,null], degs:[null,'1','5','1','9','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
+      G: { baseFret:5, frets:[8,5,5,5,5,8], fingers:[3,null,null,null,null,4], degs:['1','9','5','1','3','1'], bars:[{fret:5, from:1, to:4, finger:1}] },
+      E: { baseFret:8, frets:[null,null,10,9,8,10], fingers:[null,null,3,2,1,4], degs:[null,null,'1','3','5','9'], bars:[] },
+      D: { baseFret:10, frets:[null,null,10,12,13,10], fingers:[null,null,1,2,4,1], degs:[null,null,'1','5','1','9'], bars:[] },
     }},
     'C7(#9)': { label:'C7(♯9)', sub:'dominante com 9ª aumentada (Hendrix)', formula:'1 · 3 · ♭7 · ♯9', shapes:{
       C: { baseFret:1, frets:[null,1,1,0,1,0], fingers:[null,1,2,null,3,null], degs:[null,'♭7','♯9','5','1','3'], bars:[] },
       A: { baseFret:3, frets:[null,3,5,3,4,3], fingers:[null,null,3,null,2,null], degs:[null,'1','5','♭7','♯9','5'], bars:[{fret:3, from:1, to:5, finger:1}] },
-      G: { baseFret:5, frets:[6,6,5,5,5,8], fingers:[2,3,null,null,null,4], degs:['♭7','♯9','5','1','3','1'], bars:[{fret:5, from:2, to:4, finger:1}] },
+      G: { baseFret:5, frets:[null,6,null,5,5,6], fingers:[null,2,null,null,null,3], degs:[null,'♯9',null,'1','3','♭7'], bars:[{fret:5, from:3, to:4, finger:1}] },
       E: { baseFret:8, frets:[8,10,8,8,8,8], fingers:[null,2,null,null,null,null], degs:['1','5','♭7','♯9','5','1'], bars:[{fret:8, from:0, to:5, finger:1}] },
       D: { baseFret:10, frets:[null,null,10,12,11,11], fingers:[null,null,1,4,2,3], degs:[null,null,'1','5','♭7','♯9'], bars:[] },
     }},
     'C°': { label:'C°', sub:'diminuto', formula:'1 · ♭3 · ♭5', shapes:{
       C: { baseFret:1, frets:[null,3,1,null,1,2], fingers:[null,4,1,null,2,3], degs:[null,'1','♭3',null,'1','♭5'], bars:[] },
       A: { baseFret:3, frets:[null,3,4,5,4,null], fingers:[null,1,2,4,3,null], degs:[null,'1','♭5','1','♭3',null], bars:[] },
-      G: { baseFret:5, frets:[8,6,null,5,7,8], fingers:[4,2,null,1,3,4], degs:['1','♭3',null,'1','♭5','1'], bars:[] },
+      G: { baseFret:5, frets:[null,6,null,5,7,null], fingers:[null,2,null,1,3,null], degs:[null,'♭3',null,'1','♭5',null], bars:[] },
       E: { baseFret:8, frets:[8,9,10,8,null,8], fingers:[null,2,3,null,null,null], degs:['1','♭5','1','♭3',null,'1'], bars:[{fret:8, from:0, to:5, finger:1}] },
       D: { baseFret:10, frets:[null,null,10,11,13,11], fingers:[null,null,1,2,4,3], degs:[null,null,'1','♭5','1','♭3'], bars:[] },
     }},
     'Cø': { label:'Cø', sub:'meio-diminuto (m7♭5)', formula:'1 · ♭3 · ♭5 · ♭7', shapes:{
       C: { baseFret:1, frets:[null,1,1,null,1,2], fingers:[null,1,2,null,3,4], degs:[null,'♭7','♭3',null,'1','♭5'], bars:[] },
       A: { baseFret:3, frets:[null,3,4,3,4,null], fingers:[null,1,3,2,4,null], degs:[null,'1','♭5','♭7','♭3',null], bars:[] },
-      G: { baseFret:5, frets:[6,6,null,5,7,8], fingers:[null,null,null,1,3,4], degs:['♭7','♭3',null,'1','♭5','1'], bars:[{fret:6, from:0, to:1, finger:2}] },
+      G: { baseFret:5, frets:[null,6,null,5,7,6], fingers:[null,2,null,1,3,4], degs:[null,'♭3',null,'1','♭5','♭7'], bars:[] },
       E: { baseFret:8, frets:[8,9,8,8,null,8], fingers:[null,2,null,null,null,null], degs:['1','♭5','♭7','♭3',null,'1'], bars:[{fret:8, from:0, to:5, finger:1}] },
       D: { baseFret:10, frets:[null,null,10,11,11,11], fingers:[null,null,1,2,3,4], degs:[null,null,'1','♭5','♭7','♭3'], bars:[] },
     }},
@@ -311,9 +408,10 @@
       if(fm === null){ s += '<text class="cb-mark" x="'+x(m)+'" y="'+(topPad-14)+'">x</text>'; }
       else if(fm === 0){
         var openLbl = 'o';
+        var openMidi = STRINGS_OPEN_MIDI[m];
         if(state.display === 'graus'){ openLbl = ch.degs[m] || 'o'; }
         else if(state.display === 'notas'){ var openIv = ((STRINGS_OPEN[m]+0)%12+12)%12; openLbl = NOTE_BY_DEG[ch.degs[m]] || ROOTS[openIv]; }
-        s += '<text class="cb-mark" x="'+x(m)+'" y="'+(topPad-14)+'">'+openLbl+'</text>';
+        s += '<text class="cb-mark note-open" data-midi="'+openMidi+'" x="'+x(m)+'" y="'+(topPad-14)+'">'+openLbl+'</text>';
       }
     }
     // pestanas (uma ou mais — cada uma é um dedo só cobrindo 2+ cordas adjacentes)
@@ -341,7 +439,8 @@
       if(state.display === 'dedos'){ label = ch.fingers[st] ? String(ch.fingers[st]) : ''; }
       else if(state.display === 'graus'){ label = ch.degs[st] || ''; }
       else { label = NOTE_BY_DEG[ch.degs[st]] || ROOTS[iv]; }
-      s += '<g class="note '+cls+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>' + (label ? '<text x="'+cx+'" y="'+cy+'">'+label+'</text>' : '') + '</g>';
+      var midi = STRINGS_OPEN_MIDI[st] + fr;
+      s += '<g class="note '+cls+'" data-midi="'+midi+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'"/>' + (label ? '<text x="'+cx+'" y="'+cy+'">'+label+'</text>' : '') + '</g>';
     }
     s += '</svg>';
     return s;
@@ -363,6 +462,9 @@
         '<div class="stack">' +
           '<div class="card-back" aria-hidden="true"></div>' +
           '<div class="card-front" tabindex="0" role="button" aria-label="'+ariaLabel+'. Clique para avançar de posição.">' +
+            '<button type="button" class="audio-btn" aria-label="Tocar acorde '+chord.label+' na posição '+posLetter+'" title="Tocar acorde">' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4h4l5 4V6L7 10H3zm12.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 15.5 12zm0-8.5v2.06a8 8 0 0 1 0 12.88v2.06a10 10 0 0 0 0-16.99z"/></svg>' +
+            '</button>' +
             '<span class="pos-tag">'+posLetter+'</span>' +
             buildChordSVG(voicing, ariaLabel) +
           '</div>' +
@@ -375,9 +477,17 @@
         renderDecks();
       }
       var front = deck.querySelector('.card-front');
-      front.addEventListener('click', advance);
+      front.addEventListener('click', function(ev){
+        if(ev.target.closest && (ev.target.closest('g.note') || ev.target.closest('.note-open') || ev.target.closest('.audio-btn'))) return;
+        advance();
+      });
       front.addEventListener('keydown', function(ev){
         if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); advance(); }
+      });
+      var audioBtn = deck.querySelector('.audio-btn');
+      audioBtn.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        playChord(voicing);
       });
 
       var dotsEl = deck.querySelector('.dots');
@@ -442,6 +552,15 @@
       b.setAttribute('aria-pressed', active);
     });
   }
+
+  grid.addEventListener('click', function(ev){
+    var noteEl = ev.target.closest ? ev.target.closest('g.note, .note-open') : null;
+    if(!noteEl) return;
+    var midi = Number(noteEl.getAttribute('data-midi'));
+    if(!Number.isFinite(midi)) return;
+    ev.stopPropagation();
+    playMidi(midi);
+  });
 
   renderDecks();
 </script>
