@@ -10,7 +10,7 @@ Kit de estudo de guitarra (método Antônio Lugão) publicado como site estátic
 | `cronograma.html` | Rotina semanal de estudo (construção, pentatônicas, campo/modos, aplicação de arpejos, checklist de cobertura). |
 | `fundamentos.html` | Guia de teoria em Dó — arpejos, pentatônica, tétrades, derivação modal e ponte qualidade→modo. |
 | `diagramas.html` | Diagrama de braço horizontal interativo para arpejos — escolha o tipo de estudo e a tônica; alterna entre graus (T·3·5…) e nomes de notas reais. |
-| `acordes.html` | 12 variações do acorde de Dó (tríade, sétimas, sexta, extensões, diminuto e meio-diminuto) — braço vertical com pestana e dedilhado sugerido para cada uma. |
+| `acordes.html` | 12 variações do acorde de Dó (tríade, sétimas, sexta, extensões, diminuto e meio-diminuto) — braço vertical com pestana, dedilhado sugerido e áudio interativo (nota e acorde). |
 | `login.html` | Portão de acesso simples (gate) que libera as demais páginas. |
 
 ## Acesso
@@ -32,11 +32,11 @@ A página `diagramas.html` desenha o braço da guitarra em SVG e mostra **apenas
 
 ## 12 variações de Dó
 
-A página `acordes.html` mostra o acorde de Dó em doze roupagens (tríade, C7, Cm7, C6, Cm6, C7+/maj7, Cm7+, Cadd9, C7(9), C° e Cø), cada uma como um diagrama de braço vertical: pestana (quando existe) desenhada como barra sólida no dedo 1, demais notas coloridas por função (tônica, 3ª/5ª, 7ª, 6ª/9ª) usando o mesmo esquema de cores dos diagramas de arpejo.
+A página `acordes.html` mostra o acorde de Dó em doze roupagens (tríade, C7, Cm7, C6, Cm6, C7+/maj7, Cm7+, Cadd9, C7(#9), C° e Cø), cada uma como um diagrama de braço vertical: pestana (quando existe) desenhada como barra sólida no dedo 1, demais notas coloridas por função (tônica, 3ª/5ª, 7ª, 6ª/9ª) usando o mesmo esquema de cores dos diagramas de arpejo. Cada card também tem botão de alto-falante para tocar o acorde, e cada nota do diagrama pode ser clicada para tocar individualmente.
 
 ## Stack
 
-HTML, CSS e JavaScript vanilla, sem dependências ou etapa de build. Tokens de tema (cores, tipografia, sombra) e os componentes comuns (barra superior, alternador de tema, tipografia base) ficam centralizados em `style.css`, importado por todas as páginas; cada página mantém em seu próprio `<style>` apenas o CSS específico dela (layout de conteúdo e, quando existem, tokens de cor extras como os da grade do braço). Publicado via GitHub Pages a partir do branch `main`.
+HTML, CSS e JavaScript vanilla, sem etapa de build e sem dependências locais. Tokens de tema (cores, tipografia, sombra) e os componentes comuns (barra superior, alternador de tema, tipografia base) ficam centralizados em `style.css`, importado por todas as páginas; cada página mantém em seu próprio `<style>` apenas o CSS específico dela (layout de conteúdo e, quando existem, tokens de cor extras como os da grade do braço). Em `acordes.html`, o áudio usa SoundFont via CDN com fallback para síntese WebAudio local. Publicado via GitHub Pages a partir do branch `main`.
 
 ## Rodando localmente
 
